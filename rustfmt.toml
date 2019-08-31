@@ -1,0 +1,11 @@
+edition = "2018"
+unstable_features = true
+tab_spaces = 4
+indent_style = "Visual"
+#use_small_heuristics = "Max"
+enum_discrim_align_threshold = 25
+struct_field_align_threshold = 25
+control_brace_style = "ClosingNextLine"
+fn_single_line = true
+fn_args_layout = "Tall"
+
