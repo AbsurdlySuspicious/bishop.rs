@@ -1,10 +1,11 @@
 extern crate hex;
 
 use self::{Mov::*, Pos::*};
+use crate::vec2d::*;
 
 pub type CharList = Vec<char>;
 pub type CharSE = (char, char);
-pub type FieldXY = Vec<Vec<usize>>;
+pub type FieldXY = Vec2D<usize>;
 
 type PosXY = (usize, usize);
 type BitPair = (bool, bool);
@@ -28,7 +29,7 @@ impl Options {
 
     pub fn new((field_w, field_h): PosXY, chars: &str, chars_se: CharSE) -> Options {
         Options {
-            chars: Options::mk_chars(DEFAULT_CHARS),
+            chars: Options::mk_chars(chars),
             chars_se,
             field_w,
             field_h,
@@ -213,24 +214,22 @@ where
     };
     // todo test ^
 
-    let mut map_xy = vec![vec![0usize; fh]; fw];
+    let mut map_xy = Vec2D::new(fw, fh, 0usize);
     let mut pos = (sx, sy);
 
-    map_xy[sx][sy] = char_s;
+    map_xy[pos] = char_s;
 
     for b in bytes {
         for &(a, b) in &bit_pairs(b) {
             pos = mov_xy(pos, lp, a, b);
-            let (x, y) = pos;
-            let ps = &mut map_xy[x][y];
+            let ps = &mut map_xy[pos];
             if *ps < char_max {
                 (*ps) = *ps + 1;
             }
         }
     }
 
-    let (x, y) = pos;
-    map_xy[x][y] = char_e;
+    map_xy[pos] = char_e;
     map_xy
 }
 
@@ -239,7 +238,7 @@ where
 pub fn heh(h: &str) {
     let data = hex::decode(h).unwrap();
     let cfg = Options::default();
-    let field = walker(data.into_iter(), &cfg);
+    let field = walker(data.into_iter(), &cfg).into_vec();
 
     let (fw, fh) = (cfg.field_w, cfg.field_h);
     println!("field:");
