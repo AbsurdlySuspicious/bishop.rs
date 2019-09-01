@@ -64,6 +64,7 @@ enum Pos {
     PCd, // DR corner
 }
 
+#[inline]
 fn bit_set_le(byte: u8, bit: u8) -> bool {
     assert!(bit <= 7);
     ((byte >> (7 - bit)) & 1) == 1
@@ -75,7 +76,7 @@ fn bit_pairs(byte: u8) -> [(bool, bool); 4] {
 
     for c in 0..=3 {
         let b = 7 - (c * 2) as u8;
-        a[c] = (bs(b - 1), bs(b))
+        a[c] = (bs(b - 1), bs(b));
     }
 
     a
@@ -179,9 +180,28 @@ where
     let char_max = cfg.chars.len();
     let (char_s, char_e) = (char_max + 1, char_max + 2);
     let (fw, fh) = (cfg.field_w, cfg.field_h);
-    let lp = (fw - 1, fh - 1);
-    let (lx, ly) = lp;
+    let (lx, ly) = (fw - 1, fh - 1);
+    let lp = (lx, ly); // todo rm
     let (sx, sy) = (lx / 2, ly / 2);
+
+    let c_pos = |(x, y): PosXY| -> Pos {
+        let (xl, xr, yt, yb) =
+            (x == 0, x == lx, y == 0, y == ly);
+
+        if xl {
+            if yt { PCa }
+            else if yb { PCc }
+            else { PL }
+        }
+        else if xr {
+            if yt { PCb }
+            else if yb { PCd }
+            else { PR }
+        }
+        else if yt { PT }
+        else if yb { PB }
+        else { PM }
+    };
 
     let mut map_xy = vec![vec![0usize; fh]; fw];
     let mut pos = (sx, sy);
