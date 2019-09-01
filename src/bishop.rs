@@ -5,7 +5,9 @@ use self::{Mov::*, Pos::*};
 pub type CharList = Vec<char>;
 pub type CharSE = (char, char);
 pub type FieldXY = Vec<Vec<usize>>;
+
 type PosXY = (usize, usize);
+type BitPair = (bool, bool);
 
 #[derive(Clone, Debug)]
 pub struct Options {
@@ -62,6 +64,22 @@ enum Pos {
     PCb, // UR corner
     PCc, // DL corner
     PCd, // DR corner
+}
+
+#[inline]
+fn u_add(a: usize, b: isize) -> usize {
+    let ub = b.abs() as usize;
+    if b < 0 {a - ub}
+    else {a + ub}
+}
+
+fn _u_add_alt(a: usize, b: isize) -> usize {
+    (a as isize + b) as usize
+}
+
+#[inline]
+fn bit_v(b: bool) -> isize {
+    if b {1} else {-1}
 }
 
 #[inline]
@@ -184,24 +202,16 @@ where
     let lp = (lx, ly); // todo rm
     let (sx, sy) = (lx / 2, ly / 2);
 
-    let c_pos = |(x, y): PosXY| -> Pos {
-        let (xl, xr, yt, yb) =
-            (x == 0, x == lx, y == 0, y == ly);
-
-        if xl {
-            if yt { PCa }
-            else if yb { PCc }
-            else { PL }
-        }
-        else if xr {
-            if yt { PCb }
-            else if yb { PCd }
-            else { PR }
-        }
-        else if yt { PT }
-        else if yb { PB }
-        else { PM }
+    let vc = |(x, y): PosXY, (a, b): BitPair| -> PosXY {
+        let (xs, ys, xe, ye) = (x == 0, y == 0, x == lx, y == ly);
+        let (mut xv, mut yv) = (bit_v(b), bit_v(a));
+        if ys && yv < 0 {yv = 0};
+        if xs && xv < 0 {xv = 0};
+        if ye && yv > 0 {yv = 0};
+        if xe && xv > 0 {xv = 0};
+        (u_add(x, xv), u_add(y, yv))
     };
+    // todo test ^
 
     let mut map_xy = vec![vec![0usize; fh]; fw];
     let mut pos = (sx, sy);
@@ -240,6 +250,10 @@ pub fn heh(h: &str) {
         }
         println!("{:?}", line);
     }
+}
+
+pub fn heh2() {
+    println!("{} {}", true as u8, false as u8);
 }
 
 #[cfg(test)]

@@ -3,9 +3,15 @@ use std::env::*;
 
 fn main() {
     let argv: Vec<_> = args().collect();
-    let inp = &argv[1];
-    println!("Input: {}\n", inp);
-    bishop::heh(inp);
+
+    if argv.len() >= 2 {
+        let inp = &argv[1];
+        println!("Input: {}\n", inp);
+        bishop::heh(inp);
+    }
+    else {
+        bishop::heh2();
+    }
 }
 
 // binary from file:
