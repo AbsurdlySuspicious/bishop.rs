@@ -8,8 +8,7 @@ fn main() {
         let inp = &argv[1];
         println!("Input: {}\n", inp);
         bishop::heh(inp);
-    }
-    else {
+    } else {
         bishop::heh2();
     }
 }

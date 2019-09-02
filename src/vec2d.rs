@@ -29,6 +29,8 @@ impl<T: Clone> Vec2D<T> {
     pub fn into_vec(self) -> InnerVec<T> {
         self.0
     }
+
+    pub fn vec(&self) -> &InnerVec<T> { &self.0 }
 }
 
 impl<T: Clone + Default> Vec2D<T> {

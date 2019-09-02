@@ -1,10 +1,8 @@
 extern crate hex;
 
-use self::{Mov::*, Pos::*};
 use crate::vec2d::*;
 
 pub type CharList = Vec<char>;
-pub type CharSE = (char, char);
 pub type FieldXY = Vec2D<usize>;
 
 type PosXY = (usize, usize);
@@ -12,14 +10,12 @@ type BitPair = (bool, bool);
 
 #[derive(Clone, Debug)]
 pub struct Options {
-    chars: CharList,
-    chars_se: CharSE,
+    chars: CharList, // [field bg][char]...[start char][end char]
     field_w: usize,
     field_h: usize,
 }
 
-pub const DEFAULT_CHARS: &str = " .o+=*BOX@%&#/^";
-pub const DEFAULT_SE: CharSE = ('S', 'E');
+pub const DEFAULT_CHARS: &str = " .o+=*BOX@%&#/^SE";
 pub const DEFAULT_SIZE_WH: PosXY = (17, 9);
 
 impl Options {
@@ -27,51 +23,30 @@ impl Options {
         s.chars().collect()
     }
 
-    pub fn new((field_w, field_h): PosXY, chars: &str, chars_se: CharSE) -> Options {
-        Options {
-            chars: Options::mk_chars(chars),
-            chars_se,
-            field_w,
-            field_h,
+    pub fn new((field_w, field_h): PosXY, chars: &str) -> Result<Options, &'static str> {
+        if chars.len() < 4 {
+            Err("Char list must be 4 chars or longer")
+        } else {
+            Ok(Options {
+                chars: Options::mk_chars(chars),
+                field_w,
+                field_h,
+            })
         }
     }
 
     pub fn default() -> Options {
-        Options::new(DEFAULT_SIZE_WH, DEFAULT_CHARS, DEFAULT_SE)
+        match Options::new(DEFAULT_SIZE_WH, DEFAULT_CHARS) {
+            Ok(o) => o,
+            Err(e) => panic!("Wrong default options: {}", e),
+        }
     }
-}
-
-#[derive(Debug)]
-enum Mov {
-    MU,  // Up
-    MD,  // Down
-    MR,  // Right
-    ML,  // Left
-    MUR, // Up-Right
-    MUL, // Up-Left
-    MDR, // Down-Right
-    MDL, // Down-Left
-    Mno, // Stay
-}
-
-#[derive(Debug)]
-enum Pos {
-    PT,  // Top row
-    PB,  // Bottom row
-    PL,  // Left col
-    PR,  // Right col
-    PM,  // Middle
-    PCa, // UL corner
-    PCb, // UR corner
-    PCc, // DL corner
-    PCd, // DR corner
 }
 
 #[inline]
 fn u_add(a: usize, b: isize) -> usize {
     let ub = b.abs() as usize;
-    if b < 0 {a - ub}
-    else {a + ub}
+    if b < 0 { a - ub } else { a + ub }
 }
 
 fn _u_add_alt(a: usize, b: isize) -> usize {
@@ -80,7 +55,7 @@ fn _u_add_alt(a: usize, b: isize) -> usize {
 
 #[inline]
 fn bit_v(b: bool) -> isize {
-    if b {1} else {-1}
+    if b { 1 } else { -1 }
 }
 
 #[inline]
@@ -101,115 +76,23 @@ fn bit_pairs(byte: u8) -> [(bool, bool); 4] {
     a
 }
 
-// todo consider using closures for walker-related functions
-
-fn mov_vector(pos: &Pos, a: bool, b: bool) -> Mov {
-    // src direction
-    let v = if a && b {
-        MDR
-    } else if a {
-        MDL
-    } else if b {
-        MUR
-    } else {
-        MUL
-    };
-
-    // move rules
-    match (pos, v) {
-        (PT, MUL) => ML,
-        (PT, MUR) => MR,
-        (PB, MDL) => ML,
-        (PB, MDR) => MR,
-        (PL, MUL) => MU,
-        (PL, MDL) => MD,
-        (PR, MUR) => MU,
-        (PR, MDR) => MD,
-        (PCa, MUL) => Mno,
-        (PCa, MUR) => MR,
-        (PCa, MDL) => MD,
-        (PCb, MUL) => ML,
-        (PCb, MUR) => Mno,
-        (PCb, MDR) => MD,
-        (PCc, MUL) => MU,
-        (PCc, MDL) => Mno,
-        (PCc, MDR) => MR,
-        (PCd, MUR) => MU,
-        (PCd, MDL) => ML,
-        (PCd, MDR) => Mno,
-        (_, v) => v,
-    }
-}
-
-fn current_pos((x, y): PosXY, (lx, ly): PosXY) -> Pos {
-    assert!(x <= lx && y <= ly);
-
-    let (xr, yb) = (x == lx, y == ly);
-    let (xl, yt) = (x == 0, y == 0);
-
-    if !(xl || xr || yt || yb) {
-        PM
-    } else if xl && yt {
-        PCa
-    } else if xr && yt {
-        PCb
-    } else if xl && yb {
-        PCc
-    } else if xr && yb {
-        PCd
-    } else if yt {
-        PT
-    } else if yb {
-        PB
-    } else if xl {
-        PL
-    } else if xr {
-        PR
-    } else {
-        panic!("impossible position")
-    }
-}
-
-fn mov_xy(pos: PosXY, lp: PosXY, a: bool, b: bool) -> PosXY {
-    let (x, y) = pos;
-    let pt = current_pos(pos, lp);
-    let mvv = mov_vector(&pt, a, b);
-    let nc = match mvv {
-        MUL => (x - 1, y - 1),
-        MUR => (x + 1, y - 1),
-        MDL => (x - 1, y + 1),
-        MDR => (x + 1, y + 1),
-        MU => (x, y - 1),
-        MD => (x, y + 1),
-        ML => (x - 1, y),
-        MR => (x + 1, y),
-        Mno => (x, y),
-    };
-    eprintln!(
-        "mov_xy pos{:?} lp{:?} pt{:?} mvv{:?} -> nc{:?}",
-        pos, lp, pt, mvv, nc
-    );
-    nc
-}
-
 fn walker<I>(bytes: I, cfg: &Options) -> FieldXY
 where
     I: Iterator<Item = u8>,
 {
-    let char_max = cfg.chars.len();
+    let char_max = cfg.chars.len() - 3; // last char index
     let (char_s, char_e) = (char_max + 1, char_max + 2);
     let (fw, fh) = (cfg.field_w, cfg.field_h);
     let (lx, ly) = (fw - 1, fh - 1);
-    let lp = (lx, ly); // todo rm
     let (sx, sy) = (lx / 2, ly / 2);
 
-    let vc = |(x, y): PosXY, (a, b): BitPair| -> PosXY {
+    let mov_xy = |(x, y): PosXY, a: bool, b: bool| -> PosXY {
         let (xs, ys, xe, ye) = (x == 0, y == 0, x == lx, y == ly);
         let (mut xv, mut yv) = (bit_v(b), bit_v(a));
-        if ys && yv < 0 {yv = 0};
-        if xs && xv < 0 {xv = 0};
-        if ye && yv > 0 {yv = 0};
-        if xe && xv > 0 {xv = 0};
+        if ys && yv < 0 { yv = 0 };
+        if xs && xv < 0 { xv = 0 };
+        if ye && yv > 0 { yv = 0 };
+        if xe && xv > 0 { xv = 0 };
         (u_add(x, xv), u_add(y, yv))
     };
     // todo test ^
@@ -221,7 +104,7 @@ where
 
     for b in bytes {
         for &(a, b) in &bit_pairs(b) {
-            pos = mov_xy(pos, lp, a, b);
+            pos = mov_xy(pos, a, b);
             let ps = &mut map_xy[pos];
             if *ps < char_max {
                 (*ps) = *ps + 1;
@@ -233,12 +116,42 @@ where
     map_xy
 }
 
-// todo draw
+fn draw<P>(f: &FieldXY, cfg: &Options, print: P)
+where
+    P: Fn(&String),
+{
+    let (w, h, chars) = (cfg.field_w, cfg.field_h, &cfg.chars);
+    let solid_frame = {
+        let mut frame = String::with_capacity(w + 2);
+        frame.push('+');
+        for _ in 0..w {
+            frame.push('-');
+        }
+        frame.push('+');
+        frame
+    };
+
+    print(&solid_frame);
+
+    for y in 0..h {
+        let mut line = String::with_capacity(w + 2);
+        line.push('|');
+        for x in 0..w {
+            let p = f.get(x, y);
+            line.push(chars[*p]);
+        }
+        line.push('|');
+        print(&line);
+    }
+
+    print(&solid_frame);
+}
 
 pub fn heh(h: &str) {
     let data = hex::decode(h).unwrap();
     let cfg = Options::default();
-    let field = walker(data.into_iter(), &cfg).into_vec();
+    let field2d = walker(data.into_iter(), &cfg);
+    let field = field2d.vec();
 
     let (fw, fh) = (cfg.field_w, cfg.field_h);
     println!("field:");
@@ -249,6 +162,10 @@ pub fn heh(h: &str) {
         }
         println!("{:?}", line);
     }
+
+    println!();
+
+    draw(&field2d, &cfg, |s| println!("{}", &s));
 }
 
 pub fn heh2() {
