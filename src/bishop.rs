@@ -2,41 +2,53 @@ extern crate hex;
 
 use crate::vec2d::*;
 
+const PRINT_FIELD: bool = false;
+
 pub type CharList = Vec<char>;
 pub type FieldXY = Vec2D<usize>;
 
 type PosXY = (usize, usize);
-type BitPair = (bool, bool);
+//type BitPair = (bool, bool);
 
 #[derive(Clone, Debug)]
 pub struct Options {
     chars: CharList, // [field bg][char]...[start char][end char]
     field_w: usize,
     field_h: usize,
+    top_str: String,
+    bot_str: String,
 }
 
 pub const DEFAULT_CHARS: &str = " .o+=*BOX@%&#/^SE";
 pub const DEFAULT_SIZE_WH: PosXY = (17, 9);
+pub const DEFAULT_STR: &str = "";
 
 impl Options {
     fn mk_chars(s: &str) -> CharList {
         s.chars().collect()
     }
 
-    pub fn new((field_w, field_h): PosXY, chars: &str) -> Result<Options, &'static str> {
+    pub fn new((w, h): PosXY, chars: &str, top: &str, bot: &str) -> Result<Options, &'static str> {
         if chars.len() < 4 {
             Err("Char list must be 4 chars or longer")
         } else {
             Ok(Options {
                 chars: Options::mk_chars(chars),
-                field_w,
-                field_h,
+                field_w: w,
+                field_h: h,
+                top_str: top.to_string(),
+                bot_str: bot.to_string(),
             })
         }
     }
 
     pub fn default() -> Options {
-        match Options::new(DEFAULT_SIZE_WH, DEFAULT_CHARS) {
+        match Options::new(
+            DEFAULT_SIZE_WH,
+            DEFAULT_CHARS,
+            DEFAULT_STR,
+            DEFAULT_STR
+        ) {
             Ok(o) => o,
             Err(e) => panic!("Wrong default options: {}", e),
         }
@@ -121,17 +133,38 @@ where
     P: Fn(&String),
 {
     let (w, h, chars) = (cfg.field_w, cfg.field_h, &cfg.chars);
-    let solid_frame = {
+
+    let fill_dash = |s: &mut String, c: usize| for _ in 0..c { s.push('-') };
+
+    let text_frame = |frame: &mut String, text: &str| {
+        let text_ln = text.len().min(w - 2);
+        let fill_w = w - (text_ln + 2);
+        let (dash, pad) = (fill_w / 2, fill_w % 2);
+        fill_dash(frame, dash);
+        frame.push('[');
+        frame.push_str(&text[..text_ln]);
+        frame.push(']');
+        fill_dash(frame, dash + pad);
+    };
+
+    let make_frame = |text: &str| {
         let mut frame = String::with_capacity(w + 2);
         frame.push('+');
-        for _ in 0..w {
-            frame.push('-');
+
+        if text.is_empty() {
+            fill_dash(&mut frame, w)
+        } else {
+            text_frame(&mut frame, text)
         }
+
         frame.push('+');
         frame
     };
 
-    print(&solid_frame);
+    let (top, bot) = (&cfg.top_str, &cfg.bot_str);
+
+    let top_frame = make_frame(top);
+    print(&top_frame);
 
     for y in 0..h {
         let mut line = String::with_capacity(w + 2);
@@ -144,32 +177,42 @@ where
         print(&line);
     }
 
-    print(&solid_frame);
+    if bot.is_empty() && top.is_empty() {
+        print(&top_frame)
+    } else {
+        print(&make_frame(bot))
+    }
 }
 
-pub fn heh(h: &str) {
+pub fn heh(h: &str, t: &str, b: &str) {
     let data = hex::decode(h).unwrap();
-    let cfg = Options::default();
+    let cfg = Options::new(DEFAULT_SIZE_WH, DEFAULT_CHARS, t, b).unwrap();
     let field2d = walker(data.into_iter(), &cfg);
-    let field = field2d.vec();
 
-    let (fw, fh) = (cfg.field_w, cfg.field_h);
-    println!("field:");
-    for y in 0..=(fh - 1) {
-        let mut line = vec![0usize; fw];
-        for x in 0..=(fw - 1) {
-            line[x] = field[x][y];
+    if PRINT_FIELD {
+        let field = field2d.vec();
+        let (fw, fh) = (cfg.field_w, cfg.field_h);
+        println!("field:");
+        for y in 0..=(fh - 1) {
+            let mut line = vec![0usize; fw];
+            for x in 0..=(fw - 1) {
+                line[x] = field[x][y];
+            }
+            println!("{:?}", line);
         }
-        println!("{:?}", line);
-    }
 
-    println!();
+        println!();
+    }
 
     draw(&field2d, &cfg, |s| println!("{}", &s));
 }
 
 pub fn heh2() {
     println!("{} {}", true as u8, false as u8);
+
+    //let s = String::new();
+    let s = "".to_string();
+    println!(r#"str "{}" cap: {}"#, s, s.capacity());
 }
 
 #[cfg(test)]
