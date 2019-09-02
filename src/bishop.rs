@@ -12,11 +12,11 @@ type PosXY = (usize, usize);
 
 #[derive(Clone, Debug)]
 pub struct Options {
-    chars: CharList, // [field bg][char]...[start char][end char]
-    field_w: usize,
-    field_h: usize,
-    top_str: String,
-    bot_str: String,
+    pub chars: CharList, // [field bg][char]...[start char][end char]
+    pub field_w: usize,
+    pub field_h: usize,
+    pub top_str: String,
+    pub bot_str: String,
 }
 
 pub const DEFAULT_CHARS: &str = " .o+=*BOX@%&#/^SE";
@@ -24,22 +24,26 @@ pub const DEFAULT_SIZE_WH: PosXY = (17, 9);
 pub const DEFAULT_STR: &str = "";
 
 impl Options {
-    fn mk_chars(s: &str) -> CharList {
+    pub fn chars_from_str(s: &str) -> CharList {
         s.chars().collect()
     }
 
     pub fn new((w, h): PosXY, chars: &str, top: &str, bot: &str) -> Result<Options, &'static str> {
         if chars.len() < 4 {
-            Err("Char list must be 4 chars or longer")
-        } else {
-            Ok(Options {
-                chars: Options::mk_chars(chars),
-                field_w: w,
-                field_h: h,
-                top_str: top.to_string(),
-                bot_str: bot.to_string(),
-            })
+            return Err("Char list must be 4 chars or longer");
         }
+
+        if w > 99 || w < 5 || h > 99 || h < 5 {
+            return Err("Field geometry must be in range (5, 5) to (99, 99)");
+        }
+
+        Ok(Options {
+            chars: chars.chars().collect(),
+            field_w: w,
+            field_h: h,
+            top_str: top.to_string(),
+            bot_str: bot.to_string(),
+        })
     }
 
     pub fn default() -> Options {
@@ -52,6 +56,12 @@ impl Options {
             Ok(o) => o,
             Err(e) => panic!("Wrong default options: {}", e),
         }
+    }
+}
+
+impl Default for Options {
+    fn default() -> Self {
+        Options::default()
     }
 }
 
@@ -107,7 +117,6 @@ where
         if xe && xv > 0 { xv = 0 };
         (u_add(x, xv), u_add(y, yv))
     };
-    // todo test ^
 
     let mut map_xy = Vec2D::new(fw, fh, 0usize);
     let mut pos = (sx, sy);
@@ -277,7 +286,7 @@ mod tests {
     ];
 
     #[test]
-    fn test_by_reference() {
+    fn test_draw_ref() {
         let cfg = Options::default();
 
         for (hash, art) in REF_ARTS {
@@ -297,7 +306,7 @@ mod tests {
     }
 
     #[test]
-    fn test_walker() {
+    fn test_walker_ref() {
         for (hash, art) in REF_ARTS {
             let cfg = Options::default();
             let mut chars = HashMap::new();
@@ -314,9 +323,31 @@ mod tests {
 
             let data = hex::decode(hash).unwrap().into_iter();
             let r = walker(data, &cfg);
-            
+
             println!("ref: {}, r: {}", ref_f.len(), r.0.len());
             assert_eq!(Vec2D(ref_f), r);
+        }
+    }
+
+    #[test]
+    fn test_cfg_validation() {
+        let set = [
+            (&[
+                Options::new((102, 1), DEFAULT_CHARS, "", ""),
+                Options::new((0, 0), DEFAULT_CHARS, "", "")
+            ][..], "Field geometry"),
+            (&[
+                Options::new(DEFAULT_SIZE_WH, ".o", "", "")
+            ][..], "Char list")
+        ];
+
+        for (cs, err) in &set {
+            for c in *cs {
+                match c {
+                    Err(e) if e.starts_with(err) => (),
+                    _ => panic!()
+                }
+            }
         }
     }
 
