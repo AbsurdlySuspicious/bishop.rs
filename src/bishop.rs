@@ -128,9 +128,9 @@ where
     map_xy
 }
 
-fn draw<P>(f: &FieldXY, cfg: &Options, print: P)
+fn draw<P>(f: &FieldXY, cfg: &Options, mut print: P)
 where
-    P: Fn(&String),
+    P: FnMut(&String),
 {
     let (w, h, chars) = (cfg.field_w, cfg.field_h, &cfg.chars);
 
@@ -236,7 +236,7 @@ mod tests {
     #[test]
     fn test_bit_pairs() {
         let n = 0xf4_u8;
-        let mut nb: Vec<_> = [(1, 1), (1, 1), (0, 1), (0, 0)]
+        let nb: Vec<_> = [(1, 1), (1, 1), (0, 1), (0, 0)]
             .iter()
             .rev()
             .map(|(a, b)| (*a == 1, *b == 1))
@@ -244,4 +244,55 @@ mod tests {
 
         assert_eq!(bit_pairs(n)[..], nb[..]);
     }
+
+    // reference arts are taken from page 16 of specification
+    // http://www.dirk-loss.de/sshvis/drunken_bishop.pdf
+
+    const REF_ARTS: &[(&str, &str)] = &[
+        ("fc94b0c1e5b0987c5843997697ee9fb7", "\
++-----------------+
+|       .=o.  .   |
+|     . *+*. o    |
+|      =.*..o     |
+|       o + ..    |
+|        S o.     |
+|         o  .    |
+|          .  . . |
+|              o .|
+|               E.|
++-----------------+\n"),
+        ("731ee54c82233359e3d5e9f6ccf87e1f", "\
++-----------------+
+|        o .. .   |
+|       + +  o    |
+|      = + ..o    |
+|       + . *o    |
+|        S o.o=   |
+|         + .. +  |
+|          .  . E |
+|              . o|
+|             ...o|
++-----------------+\n"),
+    ];
+
+    #[test]
+    fn test_walker_and_draw_reference() {
+        let cfg = Options::default();
+
+        for (hash, art) in REF_ARTS {
+            let b = hex::decode(hash).unwrap();
+            let f = walker(b.into_iter(), &cfg);
+
+            let mut out = String::new();
+            let print = |s: &String| {
+                out.push_str(s);
+                out.push('\n');
+            };
+
+            draw(&f, &cfg, print);
+
+            assert_eq!(out, *art);
+        }
+    }
+
 }
