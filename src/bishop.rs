@@ -218,6 +218,7 @@ pub fn heh2() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
 
     #[test]
     fn test_is_bit_set() {
@@ -276,7 +277,7 @@ mod tests {
     ];
 
     #[test]
-    fn test_walker_and_draw_reference() {
+    fn test_by_reference() {
         let cfg = Options::default();
 
         for (hash, art) in REF_ARTS {
@@ -292,6 +293,30 @@ mod tests {
             draw(&f, &cfg, print);
 
             assert_eq!(out, *art);
+        }
+    }
+
+    #[test]
+    fn test_walker() {
+        for (hash, art) in REF_ARTS {
+            let cfg = Options::default();
+            let mut chars = HashMap::new();
+
+            for (i, c) in DEFAULT_CHARS.chars().enumerate() {
+                chars.insert(c, i);
+            }
+
+            let ref_f: Vec<_> = art.lines()
+                .filter(|l| !l.starts_with('+'))
+                .map(|l| l.trim_matches('|'))
+                .map(|l| l.chars().map(|c| chars[&c]).collect::<Vec<_>>())
+                .collect();
+
+            let data = hex::decode(hash).unwrap().into_iter();
+            let r = walker(data, &cfg);
+            
+            println!("ref: {}, r: {}", ref_f.len(), r.0.len());
+            assert_eq!(Vec2D(ref_f), r);
         }
     }
 

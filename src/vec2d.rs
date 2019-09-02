@@ -1,29 +1,31 @@
 use std::ops::{Index, IndexMut};
 
 pub type InnerVec<T> = Vec<Vec<T>>;
-pub struct Vec2D<T>(InnerVec<T>);
+
+#[derive(PartialEq, Debug)]
+pub struct Vec2D<T>(pub InnerVec<T>);
 
 impl<T: Clone> Vec2D<T> {
     pub fn new(w: usize, h: usize, init: T) -> Vec2D<T> {
-        Vec2D(vec![vec![init; h]; w])
+        Vec2D(vec![vec![init; w]; h])
     }
 
     pub fn get(&self, x: usize, y: usize) -> &T {
-        &self.0[x][y]
+        &self.0[y][x]
     }
 
     pub fn get_mut(&mut self, x: usize, y: usize) -> &mut T {
-        &mut self.0[x][y]
+        &mut self.0[y][x]
     }
 
     pub fn iget(&self, x: isize, y: isize) -> &T {
         assert!(x >= 0 && y >= 0);
-        &self.0[x as usize][y as usize]
+        &self.0[y as usize][x as usize]
     }
 
     pub fn iget_mut(&mut self, x: isize, y: isize) -> &mut T {
         assert!(x >= 0 && y >= 0);
-        &mut self.0[x as usize][y as usize]
+        &mut self.0[y as usize][x as usize]
     }
 
     pub fn into_vec(self) -> InnerVec<T> {
