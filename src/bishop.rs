@@ -246,6 +246,7 @@ pub fn art_str<I: AsBsInput>(input: I, cfg: &Options) -> Result<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::BsError;
     use std::collections::HashMap;
 
     #[test]
@@ -310,7 +311,6 @@ mod tests {
 
         for (hash, art) in REF_ARTS {
             let b = hex::decode(hash).unwrap();
-            let f = walker(&mut slice_input(&b), &cfg).unwrap();
 
             let mut out = String::new();
             let print = |s: &String| {
@@ -318,7 +318,7 @@ mod tests {
                 out.push('\n');
             };
 
-            draw(&f, &cfg, print);
+            art_print(b.as_slice(), &cfg, print).unwrap();
 
             assert_eq!(out, *art);
         }
@@ -340,20 +340,22 @@ mod tests {
                 .map(|l| l.chars().map(|c| chars[&c]).collect::<Vec<_>>())
                 .collect();
 
-            let mut data = hex::decode(hash).unwrap().into_iter();
-            let r = walker(&mut data, &cfg).unwrap();
+            let data = hex::decode(hash).unwrap();
+            let r = walker(&mut data.bs_input(), &cfg).unwrap();
 
             println!("ref: {}, r: {}", ref_f.len(), r.0.len());
             assert_eq!(Vec2D(ref_f), r);
         }
     }
 
-    /*#[test]
+    #[test]
     fn test_cfg_validation() {
         let set = [
             (&[
-                Options::new((102, 1), DEFAULT_CHARS, "", ""),
-                Options::new((0, 0), DEFAULT_CHARS, "", "")
+                Options::new((std::usize::MAX, 15), DEFAULT_CHARS, "", ""),
+                Options::new((15, std::usize::MAX), DEFAULT_CHARS, "", ""),
+                Options::new((0, 15), DEFAULT_CHARS, "", ""),
+                Options::new((15, 0), DEFAULT_CHARS, "", "")
             ][..], "Field geometry"),
             (&[
                 Options::new(DEFAULT_SIZE_WH, ".o", "", "")
@@ -363,11 +365,11 @@ mod tests {
         for (cs, err) in &set {
             for c in *cs {
                 match c {
-                    Err(e) if e.starts_with(err) => (),
+                    Err(BsError::Err { msg }) if msg.starts_with(err) => (),
                     _ => panic!()
                 }
             }
         }
-    }*/
+    }
 
 }
