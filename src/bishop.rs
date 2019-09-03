@@ -248,6 +248,7 @@ mod tests {
     use super::*;
     use crate::BsError;
     use std::collections::HashMap;
+    use std::{fs::File, io::{BufReader, Read}};
 
     #[test]
     fn test_is_bit_set() {
@@ -370,6 +371,24 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn test_inputs() -> Result<()> {
+        let cfg = Options::default();
+
+        println!("hex art_str");
+        let h = "aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f";
+        let hd = hex::decode(h)?;
+        println!("{}\n", art_str(hd.as_slice(), &cfg)?);
+
+        println!("file art_print");
+        let f = File::open("test_stuff/foobar_hash")?;
+        let mut bf = BufReader::new(f).bytes();
+        art_print(& mut bf, &cfg, |s| println!("{}", s))?;
+        println!();
+
+        Ok(())
     }
 
 }
