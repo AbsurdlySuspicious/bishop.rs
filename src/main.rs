@@ -1,24 +1,48 @@
 use std::env::*;
 use drunken_bishop::bishop::*;
+use structopt::StructOpt;
+use std::path::PathBuf;
+
+#[derive(StructOpt, Debug)]
+#[structopt(name = "drunken-bishop")]
+struct Opts {
+
+    /// Input file; use - for stdin
+    #[structopt(short, parse(from_os_str))]
+    input: Option<PathBuf>,
+
+    /// Hex input; should have even length
+    #[structopt(name = "hex")]
+    hex: Option<String>,
+
+    /// Don't repeat input to console
+    #[structopt(short, long)]
+    quiet: bool,
+
+    /// Custom char list: '[bg][char]...[start][end]'
+    #[structopt(long)]
+    chars: Option<String>,
+
+    /// Field width
+    #[structopt(short, long, default_value = "17")]
+    width: u8,
+
+    /// Field height
+    #[structopt(short, long, default_value = "9")]
+    height: u8,
+
+    /// Top frame text
+    #[structopt(short, long)]
+    top: Option<String>,
+
+    /// Bottom frame text
+    #[structopt(short, long)]
+    bot: Option<String>,
+}
 
 fn main() {
-    let emp = String::new();
-    let argv: Vec<_> = args().collect();
-
-    if argv.len() >= 2 {
-
-        let inp = &argv[1];
-        let top = argv.get(2).unwrap_or(&emp);
-        let bot = argv.get(3).unwrap_or(&emp);
-
-        let cfg = Options::new(DEFAULT_SIZE_WH, DEFAULT_CHARS, top, bot).unwrap();
-
-        let data = hex::decode(inp).unwrap();
-
-        println!("Input: {}\n", inp);
-        println!("{}", art_str(&mut slice_input(&data), &cfg).unwrap());
-        println!();
-    }
+    let o = Opts::from_args();
+    println!("{:#?}", o);
 }
 
 // binary from file:
