@@ -1,8 +1,7 @@
 extern crate hex;
 
 use crate::vec2d::*;
-
-const PRINT_FIELD: bool = false;
+use crate::input::*;
 
 pub type CharList = Vec<char>;
 pub type FieldXY = Vec2D<usize>;
@@ -98,9 +97,9 @@ fn bit_pairs(byte: u8) -> [(bool, bool); 4] {
     a
 }
 
-fn walker<I>(bytes: I, cfg: &Options) -> FieldXY
+fn walker<K, I>(bytes: &mut I, cfg: &Options) -> Result<FieldXY, String>
 where
-    I: Iterator<Item = u8>,
+    I: BsInput<K>,
 {
     let char_max = cfg.chars.len() - 3; // last char index
     let (char_s, char_e) = (char_max + 1, char_max + 2);
@@ -123,8 +122,13 @@ where
 
     map_xy[pos] = char_s;
 
-    for b in bytes {
-        for &(a, b) in &bit_pairs(b) {
+    loop {
+        let bit = match bytes.read_b()? {
+            Some(b) => b,
+            None => break
+        };
+
+        for &(a, b) in &bit_pairs(bit) {
             pos = mov_xy(pos, a, b);
             let ps = &mut map_xy[pos];
             if *ps < char_max {
@@ -134,7 +138,7 @@ where
     }
 
     map_xy[pos] = char_e;
-    map_xy
+    Ok(map_xy)
 }
 
 fn draw<P>(f: &FieldXY, cfg: &Options, mut print: P)
@@ -193,35 +197,34 @@ where
     }
 }
 
-pub fn heh(h: &str, t: &str, b: &str) {
-    let data = hex::decode(h).unwrap();
-    let cfg = Options::new(DEFAULT_SIZE_WH, DEFAULT_CHARS, t, b).unwrap();
-    let field2d = walker(data.into_iter(), &cfg);
-
-    if PRINT_FIELD {
-        let field = field2d.vec();
-        let (fw, fh) = (cfg.field_w, cfg.field_h);
-        println!("field:");
-        for y in 0..=(fh - 1) {
-            let mut line = vec![0usize; fw];
-            for x in 0..=(fw - 1) {
-                line[x] = field[x][y];
-            }
-            println!("{:?}", line);
-        }
-
-        println!();
-    }
-
-    draw(&field2d, &cfg, |s| println!("{}", &s));
+pub fn slice_input(s: &[u8]) -> SliceInput {
+    SliceInput::new(s)
 }
 
-pub fn heh2() {
-    println!("{} {}", true as u8, false as u8);
+pub fn art_print<K, I, F>(input: &mut I, cfg: &Options, print: F) -> Result<(), String>
+where
+    I: BsInput<K>,
+    F: FnMut(&String),
+{
+    Ok(draw(&walker(input, cfg)?, cfg, print))
+}
 
-    //let s = String::new();
-    let s = "".to_string();
-    println!(r#"str "{}" cap: {}"#, s, s.capacity());
+pub fn art_str<K, I>(input: &mut I, cfg: &Options) -> Result<String, String>
+where
+    I: BsInput<K>,
+{
+    let cap = (cfg.field_w + 3) * (cfg.field_h + 2);
+    let mut out = String::with_capacity(cap);
+
+    let p = |s: &String| {
+        out.push_str(s);
+        out.push('\n');
+    };
+
+    eprintln!("init cap: {}", cap);
+    art_print(input, cfg, p)?;
+    eprintln!("after cap: {}", out.capacity());
+    Ok(out)
 }
 
 #[cfg(test)]
@@ -291,7 +294,7 @@ mod tests {
 
         for (hash, art) in REF_ARTS {
             let b = hex::decode(hash).unwrap();
-            let f = walker(b.into_iter(), &cfg);
+            let f = walker(&mut slice_input(&b), &cfg).unwrap();
 
             let mut out = String::new();
             let print = |s: &String| {
@@ -321,8 +324,8 @@ mod tests {
                 .map(|l| l.chars().map(|c| chars[&c]).collect::<Vec<_>>())
                 .collect();
 
-            let data = hex::decode(hash).unwrap().into_iter();
-            let r = walker(data, &cfg);
+            let mut data = hex::decode(hash).unwrap().into_iter();
+            let r = walker(&mut data, &cfg).unwrap();
 
             println!("ref: {}, r: {}", ref_f.len(), r.0.len());
             assert_eq!(Vec2D(ref_f), r);
