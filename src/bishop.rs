@@ -1,6 +1,6 @@
 use crate::vec2d::*;
 use crate::input::*;
-use crate::{raise, Result};
+use crate::{_raise, Result};
 
 pub type CharList = Vec<char>;
 pub type FieldXY = Vec2D<usize>;
@@ -30,7 +30,7 @@ impl Options {
 
     pub fn new((w, h): PosXY, chars: &str, top: &str, bot: &str) -> Result<Options> {
         if chars.len() < 4 {
-            return raise("Char list must be 4 chars or longer");
+            return _raise("Char list must be 4 chars or longer");
         }
 
         let ((min_w, min_h), (max_w, max_h)) =
@@ -41,7 +41,7 @@ impl Options {
                 "Field geometry must be within range: [{},{}] - [{},{}]",
                 min_w, min_h, max_w, max_h
             );
-            return raise(e);
+            return _raise(e);
         }
 
         Ok(Options {

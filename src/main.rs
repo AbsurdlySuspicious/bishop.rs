@@ -1,4 +1,4 @@
-use drunken_bishop::{bishop::*, raise, Result};
+use drunken_bishop::{bishop::*, _raise, Result};
 use structopt::StructOpt;
 use std::path::PathBuf;
 use std::io::{self, Read, BufReader};
@@ -81,18 +81,15 @@ fn main_() -> Result<()> {
 
     let () = match (&o.input, o.hex) {
         (Some(d), None) if *d == dash => {
-            eprintln!("stdin");
             let mut bf = io::stdin().bytes();
             art_print(&mut bf, &cfg, print)?
         },
         (Some(i), None) => {
-            eprintln!("file");
             let f = File::open(i)?;
             let mut bf = BufReader::new(f).bytes();
             art_print(&mut bf, &cfg, print)?
         },
         (None, Some(h)) => {
-            eprintln!("hex");
             if !o.quiet {
                 println!("Fingerprint of {}\n", h);
             }
@@ -100,7 +97,7 @@ fn main_() -> Result<()> {
             let d = hex::decode(h)?;
             art_print(d.as_slice(), &cfg, print)?
         },
-        _ => raise(
+        _ => _raise(
             "Either -i OR <hex> should be specified\n\
             Check --help for usage")?
     };

@@ -15,6 +15,6 @@ custom_error! {pub BsError
     Err{msg: String} = "{msg}"
 }
 
-pub fn raise<R, S: Into<String>>(m: S) -> Result<R> {
+pub fn _raise<R, S: Into<String>>(m: S) -> Result<R> {
     Err(BsError::Err { msg: m.into() })
 }
