@@ -71,7 +71,7 @@ fn main_() -> Result<()> {
         },
         (None, Some(h)) => {
             if !o.quiet {
-                println!("Fingerprint of {}\n", h);
+                println!("Fingerprint of:\n{}\n", h);
             }
 
             let d = hex::decode(h)?;
