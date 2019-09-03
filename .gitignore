@@ -3,4 +3,5 @@
 /target
 **/*.rs.bk
 Cargo.lock
+drunken-bishop
 

@@ -1,17 +1,5 @@
 use crate::BsError;
-use std::fmt::Display;
 use std::io::{Bytes, Read};
-use std::process::exit;
-
-fn _raise<T, E: Display>(res: Result<T, E>) -> T {
-    match res {
-        Ok(r) => r,
-        Err(e) => {
-            eprintln!("{}", e);
-            exit(1);
-        }
-    }
-}
 
 pub trait AsBsInput {
     type I: BsInput;

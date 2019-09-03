@@ -1,6 +1,6 @@
 use crate::vec2d::*;
 use crate::input::*;
-use crate::BsError;
+use crate::{raise, Result};
 
 pub type CharList = Vec<char>;
 pub type FieldXY = Vec2D<usize>;
@@ -26,13 +26,13 @@ impl Options {
         s.chars().collect()
     }
 
-    pub fn new((w, h): PosXY, chars: &str, top: &str, bot: &str) -> Result<Options, &'static str> {
+    pub fn new((w, h): PosXY, chars: &str, top: &str, bot: &str) -> Result<Options> {
         if chars.len() < 4 {
-            return Err("Char list must be 4 chars or longer");
+            return raise("Char list must be 4 chars or longer");
         }
 
         if w > 99 || w < 5 || h > 99 || h < 5 {
-            return Err("Field geometry must be in range (5, 5) to (99, 99)");
+            return raise("Field geometry must be in range (5, 5) to (99, 99)");
         }
 
         Ok(Options {
@@ -69,6 +69,7 @@ fn u_add(a: usize, b: isize) -> usize {
     if b < 0 { a - ub } else { a + ub }
 }
 
+#[inline]
 fn _u_add_alt(a: usize, b: isize) -> usize {
     (a as isize + b) as usize
 }
@@ -96,7 +97,7 @@ fn bit_pairs(byte: u8) -> [(bool, bool); 4] {
     a
 }
 
-fn walker<I: BsInput>(bytes: &mut I, cfg: &Options) -> Result<FieldXY, BsError> {
+pub fn walker<I: BsInput>(bytes: &mut I, cfg: &Options) -> Result<FieldXY> {
     let char_max = cfg.chars.len() - 3; // last char index
     let (char_s, char_e) = (char_max + 1, char_max + 2);
     let (fw, fh) = (cfg.field_w, cfg.field_h);
@@ -137,7 +138,7 @@ fn walker<I: BsInput>(bytes: &mut I, cfg: &Options) -> Result<FieldXY, BsError> 
     Ok(map_xy)
 }
 
-fn draw<P>(f: &FieldXY, cfg: &Options, mut print: P)
+pub fn draw<P>(f: &FieldXY, cfg: &Options, mut print: P)
 where
     P: FnMut(&String),
 {
@@ -193,7 +194,7 @@ where
     }
 }
 
-pub fn art_print<I, F>(input: I, cfg: &Options, print: F) -> Result<(), BsError>
+pub fn art_print<I, F>(input: I, cfg: &Options, print: F) -> Result<()>
 where
     I: AsBsInput,
     F: FnMut(&String),
@@ -201,7 +202,7 @@ where
     Ok(draw(&walker(&mut input.bs_input(), cfg)?, cfg, print))
 }
 
-pub fn art_str<I: AsBsInput>(input: I, cfg: &Options) -> Result<String, BsError> {
+pub fn art_str<I: AsBsInput>(input: I, cfg: &Options) -> Result<String> {
     let cap = (cfg.field_w + 3) * (cfg.field_h + 2);
     let mut out = String::with_capacity(cap);
 

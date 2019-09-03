@@ -1,7 +1,7 @@
-use drunken_bishop::{BsError, bishop::*};
+use drunken_bishop::{bishop::*, raise, Result};
 use structopt::StructOpt;
 use std::path::PathBuf;
-use std::io::{Read, BufReader};
+use std::io::{self, Read, BufReader};
 use std::fs::File;
 
 #[derive(StructOpt, Debug)]
@@ -26,11 +26,11 @@ struct Opts {
 
     /// Field width
     #[structopt(short, long, default_value = "17")]
-    width: u8,
+    width: usize,
 
     /// Field height
     #[structopt(short, long, default_value = "9")]
-    height: u8,
+    height: usize,
 
     /// Top frame text
     #[structopt(short, long)]
@@ -41,7 +41,7 @@ struct Opts {
     bot: Option<String>,
 }
 
-fn test() -> Result<(), BsError> {
+fn _test() -> Result<()> {
     let o = Opts::from_args();
     println!("{:#?}", o);
 
@@ -61,13 +61,57 @@ fn test() -> Result<(), BsError> {
     Ok(())
 }
 
-fn main_() -> Result<(), BsError> {
-    test()
+fn str_opt<'a>(s: &'a Option<String>, d: &'static str) -> &'a str {
+    if let Some(s) = s { &s } else { d }
+}
+
+
+fn main_() -> Result<()> {
+    let o = Opts::from_args();
+
+    let cfg = Options::new(
+        (o.width, o.height),
+        str_opt(&o.chars, DEFAULT_CHARS),
+        str_opt(&o.top, ""),
+        str_opt(&o.bot, "")
+    )?;
+
+    let print = |s: &String| println!("{}", s);
+    let dash = PathBuf::from("-");
+
+    let () = match (&o.input, o.hex) {
+        (Some(d), None) if *d == dash => {
+            eprintln!("stdin");
+            let mut bf = io::stdin().bytes();
+            art_print(&mut bf, &cfg, print)?
+        },
+        (Some(i), None) => {
+            eprintln!("file");
+            let f = File::open(i)?;
+            let mut bf = BufReader::new(f).bytes();
+            art_print(&mut bf, &cfg, print)?
+        },
+        (None, Some(h)) => {
+            eprintln!("hex");
+            if !o.quiet {
+                println!("Fingerprint of {}\n", h);
+            }
+
+            let d = hex::decode(h)?;
+            art_print(d.as_slice(), &cfg, print)?
+        },
+        _ => raise(
+            "Either -i OR <hex> should be specified\n\
+            Check --help for usage")?
+    };
+
+    Ok(())
 }
 
 fn main() {
     if let Err(e) = main_() {
         eprintln!("{}", e);
+        std::process::exit(1);
     }
 }
 
