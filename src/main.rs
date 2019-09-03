@@ -1,7 +1,8 @@
-use std::env::*;
-use drunken_bishop::bishop::*;
+use drunken_bishop::{BsError, bishop::*};
 use structopt::StructOpt;
 use std::path::PathBuf;
+use std::io::{Read, BufReader};
+use std::fs::File;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "drunken-bishop")]
@@ -40,9 +41,34 @@ struct Opts {
     bot: Option<String>,
 }
 
-fn main() {
+fn test() -> Result<(), BsError> {
     let o = Opts::from_args();
     println!("{:#?}", o);
+
+    let cfg = Options::default();
+
+    println!("hex art_str");
+    let h = "aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f";
+    let hd = hex::decode(h)?;
+    println!("{}\n", art_str(hd.as_slice(), &cfg)?);
+
+    println!("file art_print");
+    let f = File::open("test_stuff/foobar_hash")?;
+    let mut bf = BufReader::new(f).bytes();
+    art_print(& mut bf, &cfg, |s| println!("{}", s))?;
+    println!();
+
+    Ok(())
+}
+
+fn main_() -> Result<(), BsError> {
+    test()
+}
+
+fn main() {
+    if let Err(e) = main_() {
+        eprintln!("{}", e);
+    }
 }
 
 // binary from file:

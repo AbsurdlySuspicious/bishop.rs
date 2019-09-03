@@ -1,7 +1,6 @@
-extern crate hex;
-
 use crate::vec2d::*;
 use crate::input::*;
+use crate::BsError;
 
 pub type CharList = Vec<char>;
 pub type FieldXY = Vec2D<usize>;
@@ -97,10 +96,7 @@ fn bit_pairs(byte: u8) -> [(bool, bool); 4] {
     a
 }
 
-fn walker<K, I>(bytes: &mut I, cfg: &Options) -> Result<FieldXY, String>
-where
-    I: BsInput<K>,
-{
+fn walker<I: BsInput>(bytes: &mut I, cfg: &Options) -> Result<FieldXY, BsError> {
     let char_max = cfg.chars.len() - 3; // last char index
     let (char_s, char_e) = (char_max + 1, char_max + 2);
     let (fw, fh) = (cfg.field_w, cfg.field_h);
@@ -197,22 +193,15 @@ where
     }
 }
 
-pub fn slice_input(s: &[u8]) -> SliceInput {
-    SliceInput::new(s)
-}
-
-pub fn art_print<K, I, F>(input: &mut I, cfg: &Options, print: F) -> Result<(), String>
+pub fn art_print<I, F>(input: I, cfg: &Options, print: F) -> Result<(), BsError>
 where
-    I: BsInput<K>,
+    I: AsBsInput,
     F: FnMut(&String),
 {
-    Ok(draw(&walker(input, cfg)?, cfg, print))
+    Ok(draw(&walker(&mut input.bs_input(), cfg)?, cfg, print))
 }
 
-pub fn art_str<K, I>(input: &mut I, cfg: &Options) -> Result<String, String>
-where
-    I: BsInput<K>,
-{
+pub fn art_str<I: AsBsInput>(input: I, cfg: &Options) -> Result<String, BsError> {
     let cap = (cfg.field_w + 3) * (cfg.field_h + 2);
     let mut out = String::with_capacity(cap);
 
@@ -221,9 +210,7 @@ where
         out.push('\n');
     };
 
-    eprintln!("init cap: {}", cap);
     art_print(input, cfg, p)?;
-    eprintln!("after cap: {}", out.capacity());
     Ok(out)
 }
 
