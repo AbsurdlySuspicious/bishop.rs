@@ -2,6 +2,8 @@ use crate::vec2d::*;
 use crate::input::*;
 use crate::{_raise, Result};
 
+use unicode_width::*;
+
 pub type CharList = Vec<char>;
 pub type FieldXY = Vec2D<usize>;
 
@@ -156,12 +158,29 @@ where
     let fill_dash = |s: &mut String, c: usize| for _ in 0..c { s.push('-') };
 
     let text_frame = |frame: &mut String, text: &str| {
-        let text_ln = text.len().min(w - 2);
+        let (text_idx, text_ln) = {
+            let real_w = w - 2;
+            let mut size = 0usize;
+            let mut last = 0usize;
+
+            for (i, c) in text.char_indices() {
+                let sz = size + c.width().unwrap_or(0);
+                if sz < real_w {
+                    last = i + c.len_utf8();
+                    size = sz;
+                } else {
+                    break;
+                }
+            }
+
+            (last, size)
+        };
+
         let fill_w = w - (text_ln + 2);
         let (dash, pad) = (fill_w / 2, fill_w % 2);
         fill_dash(frame, dash);
         frame.push('[');
-        frame.push_str(&text[..text_ln]);
+        frame.push_str(&text[..text_idx]);
         frame.push(']');
         fill_dash(frame, dash + pad);
     };

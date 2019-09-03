@@ -6,6 +6,7 @@ edition = "2018"
 publish = false
 
 [dependencies]
+unicode-width = "0.1.6"
 custom_error = "1.7.1"
 hex = "0.3.2"
 structopt = "0.3"
