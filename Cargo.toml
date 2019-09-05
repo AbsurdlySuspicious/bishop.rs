@@ -3,9 +3,15 @@ name = "drunken-bishop"
 version = "0.1.0"
 authors = ["AbsurdlySuspicious <repom2@airmail.cc>"]
 edition = "2018"
-publish = false
 
+description = "Library and CLI app for visualizing keys and hashes using OpenSSH's Drunken Bishop algorithm"
 license = "Apache-2.0/MIT"
+documentation = "https://docs.rs/drunken-bishop"
+repository = "https://github.com/AbsurdlySuspicious/drunken-bishop.rs"
+keywords = ["cli", "fingerprint", "visualize"]
+readme = "README.md"
+
+
 
 [dependencies]
 unicode-width = "0.1.6"
