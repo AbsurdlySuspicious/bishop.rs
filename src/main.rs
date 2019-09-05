@@ -4,40 +4,41 @@ use std::path::PathBuf;
 use std::io::{self, Read, BufReader};
 use std::fs::File;
 
+/// Visualises keys and hashes using OpenSSH's Drunken Bishop algorithm
 #[derive(StructOpt, Debug)]
 #[structopt(name = "drunken-bishop")]
 struct Opts {
 
-    /// Input file; use - for stdin
-    #[structopt(short, parse(from_os_str))]
+    /// Input file; use '-' for stdin
+    #[structopt(short, parse(from_os_str), display_order = 1)]
     input: Option<PathBuf>,
 
     /// Hex input; should have even length
     #[structopt(name = "hex")]
     hex: Option<String>,
 
-    /// Don't repeat input to console
-    #[structopt(short, long)]
+    /// Don't echo hex input
+    #[structopt(short, long, display_order = 0)]
     quiet: bool,
 
     /// Custom char list: '[bg][char]...[start][end]'
-    #[structopt(long)]
+    #[structopt(long, display_order = 2)]
     chars: Option<String>,
 
     /// Field width
-    #[structopt(short, long, default_value = "17")]
+    #[structopt(short, long, default_value = "17", display_order = 3)]
     width: usize,
 
     /// Field height
-    #[structopt(short, long, default_value = "9")]
+    #[structopt(short, long, default_value = "9", display_order = 4)]
     height: usize,
 
     /// Top frame text
-    #[structopt(short, long)]
+    #[structopt(short, long, display_order = 5)]
     top: Option<String>,
 
     /// Bottom frame text
-    #[structopt(short, long)]
+    #[structopt(short, long, display_order = 6)]
     bot: Option<String>,
 }
 
