@@ -1,6 +1,21 @@
 # drunken-bishop.rs
 
-Implementaion of The Drunken Bishop vlisual fingerprint algorithm in Rust.
+```
++----[drunken]----+
+|..+.. oo+o.      |
+| *.* o +.o.      |
+|= = o * .E+      |
+|+. ..+ = +..     |
+|o  ...+ S.o      |
+| .o .....= .     |
+|.. o   .+ +      |
+|.        = +     |
+|        ..=      |
++----[bishop]-----+
+```
+
+Implementaion of The Drunken Bishop vlisual fingerprint algorithm
+(that one used for so-called *randomarts* in **ssh-keygen**) in Rust.
 This package provides library crate and command-line application for visualising any binary or hex-formatted data.
 
 Reference used for this implementation:
