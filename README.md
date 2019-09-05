@@ -1,6 +1,9 @@
-# drunken-bishop.rs
+<div align="center">
+<h1>drunken-bishop.rs</h1>
 
-```
+<!--badges-->
+
+<table><tr><td><pre>
 +----[drunken]----+
 |..+.. oo+o.      |
 | *.* o +.o.      |
@@ -12,9 +15,10 @@
 |.        = +     |
 |        ..=      |
 +----[bishop]-----+
-```
+</pre></td></tr></table>
+</div>
 
-Implementaion of The Drunken Bishop vlisual fingerprint algorithm
+Implementaion of The Drunken Bishop visual fingerprint algorithm
 (that one used for so-called *randomarts* in **ssh-keygen**) in Rust.
 This package provides library crate and command-line application for visualising any binary or hex-formatted data.
 
@@ -23,16 +27,16 @@ http://www.dirk-loss.de/sshvis/drunken_bishop.pdf
 
 ## Examples
 
-### Using as library in my project
+### Using as command-line utility
 `TODO`
 
-### Using as command-line utility
+### Using as library in my project
 `TODO`
 
 ## Options explanation
 
-CLI | Options struct | Description
-----|----------------|------------
+CLI | Options struct | Description |
+----|----------------|-------------|
 
 `TODO`
 
