@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::io::{self, Read, BufReader};
 use std::fs::File;
 
-/// Visualises keys and hashes using OpenSSH's Drunken Bishop algorithm
+/// Visualizes keys and hashes using OpenSSH's Drunken Bishop algorithm
 #[derive(StructOpt, Debug)]
 #[structopt(name = "drunken-bishop")]
 struct Opts {

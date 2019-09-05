@@ -1,6 +1,9 @@
 use crate::BsError;
 use std::io::{Bytes, Read};
 
+/// Type which can be converted to `BsInput`.
+/// Used as workaround instead of `Into<T>`
+/// because of Rust limitations.
 pub trait AsBsInput {
     type I: BsInput;
     fn bs_input(self) -> Self::I;
@@ -24,7 +27,10 @@ impl<'a> AsBsInput for &'a [u8] {
 
 pub type BsReadResult = Result<Option<u8>, BsError>;
 
+/// Input acceptable by `walker` and `art_*` functions
 pub trait BsInput {
+    /// Returns next byte from input,
+    /// `None` on End of Input or `BsError` on error
     fn read_b(&mut self) -> BsReadResult;
 }
 

@@ -9,20 +9,56 @@ pub type FieldXY = Vec2D<usize>;
 
 type PosXY = (usize, usize);
 
+/// Fingerprint generation options
 #[derive(Clone, Debug)]
 pub struct Options {
-    pub chars: CharList, // [field bg][char]...[start char][end char]
+    /// Vector of chars used for art
+    ///
+    /// Each char is treated as:
+    ///
+    /// Index  | Description             | Default          |
+    /// -------|-------------------------|------------------|
+    /// `0`    | Field background        | ` `              |
+    /// `1..n` | Chars used for drawing  | `.o+=*BOX@%&#/^` |
+    /// `n+1`  | Char for start position | `S`              |
+    /// `n+2`  | Char for last position  | `E`              |
+    ///
+    /// Each non-background char indicates how many
+    /// times bishop has been on this position.
+    ///
+    /// Start and end chars overwrites the real value.
+    ///
+    /// Char list must be at least 4 chars long,
+    /// but secure char list is at least 18 chars long
+    /// and only consists of clearly distinguishable symbols.
+    pub chars: CharList,
+
+    /// Field width
     pub field_w: usize,
+
+    /// Field height
     pub field_h: usize,
+
+    /// Text for top frame border
     pub top_str: String,
+
+    /// Text for bottom frame border
     pub bot_str: String,
 }
 
+/// Maximum size for a field (x, y)
 pub const GEOMETRY_LIMITS_MAX: PosXY = (500, 500);
+
+/// Minimum size for a field (x, y)
 pub const GEOMETRY_LIMITS_MIN: PosXY = (5, 5);
+
+/// Default field size (x, y)
 pub const DEFAULT_SIZE_WH: PosXY = (17, 9);
 
+/// Default char list (see `Options`)
 pub const DEFAULT_CHARS: &str = " .o+=*BOX@%&#/^SE";
+
+/// Default text for frame borders
 pub const DEFAULT_TEXT: &str = "";
 
 impl Options {
@@ -108,6 +144,12 @@ fn bit_pairs(byte: u8) -> [(bool, bool); 4] {
     a
 }
 
+
+/// Returns a field with raw values generated from `bytes`
+///
+/// # Arguments
+/// * `bytes` - Input that implements `BsInput`
+/// * `cfg` - Reference to `Options` struct
 pub fn walker<I: BsInput>(bytes: &mut I, cfg: &Options) -> Result<FieldXY> {
     let char_max = cfg.chars.len() - 3; // last char index
     let (char_s, char_e) = (char_max + 1, char_max + 2);
@@ -149,6 +191,12 @@ pub fn walker<I: BsInput>(bytes: &mut I, cfg: &Options) -> Result<FieldXY> {
     Ok(map_xy)
 }
 
+/// Draws a fingerprint from raw field line-by-line
+///
+/// # Arguments
+/// * `f` - Raw field from `walker`
+/// * `cfg` - Reference to `Options` struct
+/// * `print` - Function to which lines will be passed
 pub fn draw<P>(f: &FieldXY, cfg: &Options, mut print: P)
 where
     P: FnMut(&String),
@@ -222,6 +270,16 @@ where
     }
 }
 
+/// Prints a fingerprint generated from `input` using `print` function
+/// line-by-line.
+///
+/// # Arguments
+/// * `input` - `&[u8]`, `&mut Bytes<Read>`  or other type that implements `BsInput`
+/// * `cfg` - Reference to `Options` struct
+/// * `print` - Function to which lines will be passed
+///
+/// # Errors
+/// Returns `BsError` on failure
 pub fn art_print<I, F>(input: I, cfg: &Options, print: F) -> Result<()>
 where
     I: AsBsInput,
@@ -230,6 +288,14 @@ where
     Ok(draw(&walker(&mut input.bs_input(), cfg)?, cfg, print))
 }
 
+/// Returns a String containing fingerprint generated from `input`
+///
+/// # Arguments
+/// * `input` - `&[u8]`, `&mut Bytes<Read>`  or other type that implements `BsInput`
+/// * `cfg` - Reference to `Options` struct
+///
+/// # Errors
+/// Returns `BsError` on failure
 pub fn art_str<I: AsBsInput>(input: I, cfg: &Options) -> Result<String> {
     let cap = (cfg.field_w + 3) * (cfg.field_h + 2);
     let mut out = String::with_capacity(cap);

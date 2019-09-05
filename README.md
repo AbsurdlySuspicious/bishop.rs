@@ -19,9 +19,9 @@
 </pre></td></tr></table>
 </div>
 
-Implementaion of The Drunken Bishop visual fingerprint algorithm
+Implementation of The Drunken Bishop visual fingerprint algorithm
 (that one used for so-called *randomarts* in **ssh-keygen**) in Rust.
-This package provides library crate and command-line application for visualising any binary or hex-formatted data.
+This package provides library crate and command-line application for visualizing any binary or hex-formatted data.
 
 Reference used for this implementation:
 http://www.dirk-loss.de/sshvis/drunken_bishop.pdf
@@ -33,7 +33,7 @@ http://www.dirk-loss.de/sshvis/drunken_bishop.pdf
 ```
 $ drunken-bishop --help
 drunken-bishop 0.1.0
-Visualises keys and hashes using OpenSSH's Drunken Bishop algorithm
+Visualizes keys and hashes using OpenSSH's Drunken Bishop algorithm
 
 USAGE:
     drunken-bishop [FLAGS] [OPTIONS] [hex]
