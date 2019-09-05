@@ -28,10 +28,99 @@ http://www.dirk-loss.de/sshvis/drunken_bishop.pdf
 ## Examples
 
 ### Using as command-line utility
-`TODO`
+
+```
+$ drunken-bishop --help
+drunken-bishop 0.1.0
+Visualises keys and hashes using OpenSSH's Drunken Bishop algorithm
+
+USAGE:
+    drunken-bishop [FLAGS] [OPTIONS] [hex]
+
+FLAGS:
+    -q, --quiet      Don't echo hex input
+        --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -i <input>               Input file; use '-' for stdin
+        --chars <chars>      Custom char list: '[bg][char]...[start][end]'
+    -w, --width <width>      Field width [default: 17]
+    -h, --height <height>    Field height [default: 9]
+    -t, --top <top>          Top frame text
+    -b, --bot <bot>          Bottom frame text
+
+ARGS:
+    <hex>    Hex input; should have even length
+
+$ hash=$(echo foobar | sha256sum | cut -d' ' -f1)
+$ drunken-bishop "$hash"
+Fingerprint of:
+aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f
+
++-----------------+
+|          . .=*++|
+|         o  o=@=*|
+|    o   . . .*=@.|
+|   o . . .  . E+ |
+|  . . . S +o . =o|
+|   +   . .+o  . o|
+|    o   . oo     |
+|     . .  .o.    |
+|      .  ...     |
++-----------------+
+$ echo "$hash" | xxd -r -p | drunken-bishop -i -
++-----------------+
+|          . .=*++|
+|         o  o=@=*|
+|    o   . . .*=@.|
+|   o . . .  . E+ |
+|  . . . S +o . =o|
+|   +   . .+o  . o|
+|    o   . oo     |
+|     . .  .o.    |
+|      .  ...     |
++-----------------+
+$ echo "$hash" | xxd -r -p > foobar.bin
+$ drunken-bishop -i foobar.bin
++-----------------+
+|          . .=*++|
+|         o  o=@=*|
+|    o   . . .*=@.|
+|   o . . .  . E+ |
+|  . . . S +o . =o|
+|   +   . .+o  . o|
+|    o   . oo     |
+|     . .  .o.    |
+|      .  ...     |
++-----------------+
+
+```
 
 ### Using as library in my project
-`TODO`
+
+Add latest version of library from crates.io to your Cargo.toml, and then:
+
+```rust
+use drunken_bishop::bishop as bs;
+
+use std::io::{Read, BufReader};
+use std::fs::File;
+
+fn main() {
+    let cfg = bs::Options::default();
+
+    // from file to String
+    let file = File::open("some_file").unwrap();
+    let art = bs::art_str(&mut BufReader::new(file).bytes(), &cfg).unwrap();
+    println!("{}", art);
+
+    // from slice to stdout
+    let src: Vec<u8> = vec![1, 2, 3, 4, 5];
+    bs::art_print(src.as_slice(), &cfg, |p| println!("{}", p)).unwrap();
+}
+
+```
 
 ## Options explanation
 
