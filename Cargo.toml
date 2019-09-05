@@ -1,9 +1,11 @@
 [package]
 name = "drunken-bishop"
 version = "0.1.0"
-authors = ["mfgm2"]
+authors = ["AbsurdlySuspicious <repom2@airmail.cc>"]
 edition = "2018"
 publish = false
+
+license = "Apache-2.0/MIT"
 
 [dependencies]
 unicode-width = "0.1.6"
