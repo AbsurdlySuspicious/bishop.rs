@@ -1,6 +1,7 @@
 <div align="center">
 <h1>drunken-bishop.rs</h1>
 
+<a href="https://travis-ci.org/AbsurdlySuspicious/drunken-bishop.rs"><img src="https://travis-ci.org/AbsurdlySuspicious/drunken-bishop.rs.svg?branch=master"></a>
 <!--badges-->
 
 <table><tr><td><pre>
