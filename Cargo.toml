@@ -4,17 +4,18 @@ version = "0.1.0"
 authors = ["AbsurdlySuspicious <repom2@airmail.cc>"]
 edition = "2018"
 
-description = "Library and CLI app for visualizing keys and hashes using OpenSSH's Drunken Bishop algorithm"
+description = "Library for visualizing keys and hashes using OpenSSH's Drunken Bishop algorithm"
 license = "Apache-2.0/MIT"
 documentation = "https://docs.rs/drunken-bishop"
 repository = "https://github.com/AbsurdlySuspicious/drunken-bishop.rs"
-keywords = ["cli", "fingerprint", "visualize"]
+keywords = ["fingerprint", "visialization", "key-visialization"]
 readme = "README.md"
 
-
+[workspace]
+members = [
+  "drunken-bishop-cli"
+]
 
 [dependencies]
 unicode-width = "0.1.6"
 custom_error = "1.7.1"
-hex = "0.3.2"
-structopt = "0.3"

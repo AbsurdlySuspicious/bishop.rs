@@ -21,7 +21,12 @@
 
 Implementation of The Drunken Bishop visual fingerprint algorithm
 (that one used for so-called *randomarts* in **ssh-keygen**) in Rust.
-This package provides library crate and command-line application for visualizing any binary or hex-formatted data.
+
+Packages:
++ `drunken-bishop` - Library for visualizing any `&[u8]` or `Read`
+[[crates.io](https://crates.io/crates/drunken-bishop)]
++ `drunken-bishop-cli` (`bishop`) - CLI app for visualising hex or binary data
+[[crates.io](https://crates.io/crates/drunken-bishop-cli)]
 
 Reference used for this implementation:
 http://www.dirk-loss.de/sshvis/drunken_bishop.pdf
@@ -59,7 +64,7 @@ ARGS:
 
 **Passing hex as argument:**
 
-`$ drunken-bishop $(echo foobar | sha256sum | cut -d' ' -f1)`
+`$ bishop $(echo foobar | sha256sum | cut -d' ' -f1)`
 
 ```
 Fingerprint of:
@@ -80,11 +85,11 @@ aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f
 
 **Using `-i`**
 
-`$ cat foobar.bin | drunken-bishop -i -`
+`$ cat foobar.bin | bishop -i -`
 
 or
 
-`$ drunken-bishop -i foobar.bin`
+`$ bishop -i foobar.bin`
 
 ```
 +-----------------+

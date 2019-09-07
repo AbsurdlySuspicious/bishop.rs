@@ -11,7 +11,6 @@ pub type Result<T> = result::Result<T, BishopError>;
 
 custom_error! {pub BishopError
     Io{source: io::Error} = "IO: {source}",
-    Hex{source: hex::FromHexError} = "Hex parse: {source}",
     Err{msg: String} = "{msg}"
 }
 

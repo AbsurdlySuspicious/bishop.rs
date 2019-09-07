@@ -1,8 +1,16 @@
-use drunken_bishop::{bishop::*, _raise, Result};
+#[macro_use] extern crate custom_error;
+
+use drunken_bishop::{bishop::*, _raise, BishopError};
 use structopt::StructOpt;
 use std::path::PathBuf;
 use std::io::{self, Read, BufReader};
 use std::fs::File;
+
+custom_error!{ BishopCliError
+    Hex{source: hex::FromHexError} = "Hex parse: {source}",
+    Io{source: io::Error} = "IO: {source}",
+    Other{source: BishopError} = "{source}"
+}
 
 /// Visualizes keys and hashes using OpenSSH's Drunken Bishop algorithm
 #[derive(StructOpt, Debug)]
@@ -47,7 +55,7 @@ fn str_opt<'a>(s: &'a Option<String>, d: &'static str) -> &'a str {
 }
 
 
-fn main_() -> Result<()> {
+fn main_() -> Result<(), BishopCliError> {
     let o = Opts::from_args();
 
     let cfg = Options::new(
@@ -92,13 +100,3 @@ fn main() {
         std::process::exit(1);
     }
 }
-
-// binary from file:
-// $ bishop -i file
-//
-// binary from stdin
-// $ bishop -i -
-// $ bishop -c
-//
-// hex from arg
-// $ bishop 'aec070645fe53ee3b37630'
