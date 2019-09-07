@@ -12,7 +12,7 @@ type PosXY = (usize, usize);
 /// Fingerprint generation options
 #[derive(Clone, Debug)]
 pub struct Options {
-    /// Vector of chars used for art
+    /// Vector of chars used for fingerprint
     ///
     /// Each char is treated as:
     ///
@@ -145,11 +145,10 @@ fn bit_pairs(byte: u8) -> [(bool, bool); 4] {
 }
 
 
-/// Returns a field with raw values generated from `bytes`
+/// Returns a field with raw values generated from `input`
 ///
-/// # Arguments
-/// * `bytes` - Input that implements `BsInput`
-/// * `cfg` - Reference to `Options` struct
+/// # Errors
+/// Returns BishopError::Io if any IO error occurred
 pub fn walker<I: Input>(bytes: &mut I, cfg: &Options) -> Result<FieldXY> {
     let char_max = cfg.chars.len() - 3; // last char index
     let (char_s, char_e) = (char_max + 1, char_max + 2);
@@ -191,12 +190,9 @@ pub fn walker<I: Input>(bytes: &mut I, cfg: &Options) -> Result<FieldXY> {
     Ok(map_xy)
 }
 
-/// Draws a fingerprint from raw field line-by-line
-///
-/// # Arguments
-/// * `f` - Raw field from `walker`
-/// * `cfg` - Reference to `Options` struct
-/// * `print` - Function to which lines will be passed
+/// Takes raw field from `walker`
+/// and then draws a fingerprint from it line-by-line,
+/// passing each line to `print` closure
 pub fn draw<P>(f: &FieldXY, cfg: &Options, mut print: P)
 where
     P: FnMut(&String),
@@ -270,16 +266,16 @@ where
     }
 }
 
-/// Prints a fingerprint generated from `input` using `print` function
-/// line-by-line.
+/// Takes `input` and prints a fingerprint generated
+/// from `input` line-by-line,
+/// passing each line to `print` closure
 ///
-/// # Arguments
-/// * `input` - `&[u8]`, `&mut Bytes<Read>`  or other type that implements `BsInput`
-/// * `cfg` - Reference to `Options` struct
-/// * `print` - Function to which lines will be passed
+/// `input` - any type that implements input::Input.
+/// Default implementations available for `&Vec<u8>`,
+/// `&[u8]` and `&mut Bytes<Read>`
 ///
 /// # Errors
-/// Returns `BsError` on failure
+/// Returns BishopError::Io if any IO error occurred
 pub fn art_print<I, F>(input: I, cfg: &Options, print: F) -> Result<()>
 where
     I: AsInput,
@@ -288,14 +284,15 @@ where
     Ok(draw(&walker(&mut input.bs_input(), cfg)?, cfg, print))
 }
 
-/// Returns a String containing fingerprint generated from `input`
+/// Takes `input` and returns String with fingerprint image
+/// generated from it.
 ///
-/// # Arguments
-/// * `input` - `&[u8]`, `&mut Bytes<Read>`  or other type that implements `BsInput`
-/// * `cfg` - Reference to `Options` struct
+/// `input` - any type that implements input::Input.
+/// Default implementations available for `&Vec<u8>`,
+/// `&[u8]` and `&mut Bytes<Read>`
 ///
 /// # Errors
-/// Returns `BsError` on failure
+/// Returns BishopError::Io if any IO error occurred
 pub fn art_str<I: AsInput>(input: I, cfg: &Options) -> Result<String> {
     let cap = (cfg.field_w + 3) * (cfg.field_h + 2);
     let mut out = String::with_capacity(cap);

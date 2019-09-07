@@ -30,6 +30,8 @@ http://www.dirk-loss.de/sshvis/drunken_bishop.pdf
 
 ### Using as command-line utility
 
+**Usage:**
+
 ```
 $ drunken-bishop --help
 drunken-bishop 0.1.0
@@ -53,9 +55,13 @@ OPTIONS:
 
 ARGS:
     <hex>    Hex input; should have even length
+```
 
-$ hash=$(echo foobar | sha256sum | cut -d' ' -f1)
-$ drunken-bishop "$hash"
+**Passing hex as argument:**
+
+`$ drunken-bishop $(echo foobar | sha256sum | cut -d' ' -f1)`
+
+```
 Fingerprint of:
 aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f
 
@@ -70,33 +76,31 @@ aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f
 |     . .  .o.    |
 |      .  ...     |
 +-----------------+
-$ echo "$hash" | xxd -r -p | drunken-bishop -i -
-+-----------------+
-|          . .=*++|
-|         o  o=@=*|
-|    o   . . .*=@.|
-|   o . . .  . E+ |
-|  . . . S +o . =o|
-|   +   . .+o  . o|
-|    o   . oo     |
-|     . .  .o.    |
-|      .  ...     |
-+-----------------+
-$ echo "$hash" | xxd -r -p > foobar.bin
-$ drunken-bishop -i foobar.bin
-+-----------------+
-|          . .=*++|
-|         o  o=@=*|
-|    o   . . .*=@.|
-|   o . . .  . E+ |
-|  . . . S +o . =o|
-|   +   . .+o  . o|
-|    o   . oo     |
-|     . .  .o.    |
-|      .  ...     |
-+-----------------+
+```
+
+**Using `-i`**
+
+`$ cat foobar.bin | drunken-bishop -i -`
+
+or
+
+`$ drunken-bishop -i foobar.bin`
 
 ```
++-----------------+
+|          . .=*++|
+|         o  o=@=*|
+|    o   . . .*=@.|
+|   o . . .  . E+ |
+|  . . . S +o . =o|
+|   +   . .+o  . o|
+|    o   . oo     |
+|     . .  .o.    |
+|      .  ...     |
++-----------------+
+```
+
+Note that with `-i` option data is treated as **binary**, **not hex** 
 
 ### Using as library in my project
 
@@ -118,23 +122,18 @@ fn main() {
 
     // from slice to stdout
     let src: Vec<u8> = vec![1, 2, 3, 4, 5];
-    bs::art_print(src.as_slice(), &cfg, |p| println!("{}", p)).unwrap();
+    bs::art_print(&src, &cfg, |p| println!("{}", p)).unwrap();
 }
 
 ```
 
-## Options explanation
-
-CLI        | Options struct       | Description                                 |
------------|----------------------|---------------------------------------------|
-`-w`, `-h` | `field_w`, `field_h` | Field size in range from 5,5 to 500,500     |
-`-t`, `-b` | `top_str`, `bot_str` | Text to put on top and bottom frame border  |
-`--chars`  | `chars`              | Chars that will be used for art (char list) |
-`-i`       | -                    | Input file or `-` for stdin                 |
+## Help
 
 ### Char list
 
 Char list is a string each char of which is treated as:
+
+_indexing starts from 1_
 
 Index  | Description             | Default          |
 -------|-------------------------|------------------|
@@ -142,6 +141,7 @@ Index  | Description             | Default          |
 `2..n` | Chars used for drawing  | `.o+=*BOX@%&#/^` |
 `n+1`  | Char for start position | `S`              |
 `n+2`  | Char for last position  | `E`              |
+
 
 Char list must be at least 4 chars long,
 but secure char list is at least 18 chars long

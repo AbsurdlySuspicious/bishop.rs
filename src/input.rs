@@ -1,6 +1,5 @@
 use crate::Result;
 use std::io::{Bytes, Read};
-use std::borrow::Borrow;
 
 pub trait AsInput {
     type I: Input;
