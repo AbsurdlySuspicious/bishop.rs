@@ -309,7 +309,7 @@ pub fn art_str<I: AsInput>(input: I, cfg: &Options) -> Result<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::BsError;
+    use crate::BishopError;
     use std::collections::HashMap;
     use std::{fs::File, io::{BufReader, Read}};
 
@@ -429,7 +429,7 @@ mod tests {
         for (cs, err) in &set {
             for c in *cs {
                 match c {
-                    Err(BsError::Err { msg }) if msg.starts_with(err) => (),
+                    Err(BishopError::Err { msg }) if msg.starts_with(err) => (),
                     _ => panic!()
                 }
             }
