@@ -150,7 +150,7 @@ fn bit_pairs(byte: u8) -> [(bool, bool); 4] {
 /// # Arguments
 /// * `bytes` - Input that implements `BsInput`
 /// * `cfg` - Reference to `Options` struct
-pub fn walker<I: BsInput>(bytes: &mut I, cfg: &Options) -> Result<FieldXY> {
+pub fn walker<I: Input>(bytes: &mut I, cfg: &Options) -> Result<FieldXY> {
     let char_max = cfg.chars.len() - 3; // last char index
     let (char_s, char_e) = (char_max + 1, char_max + 2);
     let (fw, fh) = (cfg.field_w, cfg.field_h);
@@ -282,7 +282,7 @@ where
 /// Returns `BsError` on failure
 pub fn art_print<I, F>(input: I, cfg: &Options, print: F) -> Result<()>
 where
-    I: AsBsInput,
+    I: AsInput,
     F: FnMut(&String),
 {
     Ok(draw(&walker(&mut input.bs_input(), cfg)?, cfg, print))
@@ -296,7 +296,7 @@ where
 ///
 /// # Errors
 /// Returns `BsError` on failure
-pub fn art_str<I: AsBsInput>(input: I, cfg: &Options) -> Result<String> {
+pub fn art_str<I: AsInput>(input: I, cfg: &Options) -> Result<String> {
     let cap = (cfg.field_w + 3) * (cfg.field_h + 2);
     let mut out = String::with_capacity(cap);
 

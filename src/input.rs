@@ -1,15 +1,13 @@
-use crate::BsError;
+use crate::Result;
 use std::io::{Bytes, Read};
+use std::borrow::Borrow;
 
-/// Type which can be converted to `BsInput`.
-/// Used as workaround instead of `Into<T>`
-/// because of Rust limitations.
-pub trait AsBsInput {
-    type I: BsInput;
+pub trait AsInput {
+    type I: Input;
     fn bs_input(self) -> Self::I;
 }
 
-impl<'a, B: Read> AsBsInput for &'a mut Bytes<B> {
+impl<'a, B: Read> AsInput for &'a mut Bytes<B> {
     type I = BytesInput<'a, B>;
 
     fn bs_input(self) -> Self::I {
@@ -17,7 +15,7 @@ impl<'a, B: Read> AsBsInput for &'a mut Bytes<B> {
     }
 }
 
-impl<'a> AsBsInput for &'a [u8] {
+impl<'a> AsInput for &'a [u8] {
     type I = SliceInput<'a>;
 
     fn bs_input(self) -> Self::I {
@@ -25,32 +23,40 @@ impl<'a> AsBsInput for &'a [u8] {
     }
 }
 
-pub type BsReadResult = Result<Option<u8>, BsError>;
+impl<'a> AsInput for &'a Vec<u8> {
+    type I = SliceInput<'a>;
+
+    fn bs_input(self) -> Self::I {
+        SliceInput::new(self.as_slice())
+    }
+}
+
+pub type InputReadResult = Result<Option<u8>>;
 
 /// Input acceptable by `walker` and `art_*` functions
-pub trait BsInput {
+pub trait Input {
     /// Returns next byte from input,
     /// `None` on End of Input or `BsError` on error
-    fn read_b(&mut self) -> BsReadResult;
+    fn read_b(&mut self) -> InputReadResult;
 }
 
 pub struct SliceInput<'a> {
     pub input: &'a [u8],
-    len: usize,
     c: usize
 }
 
 impl<'a> SliceInput<'a> {
     pub fn new(s: &[u8]) -> SliceInput {
-        SliceInput { input: s, len: s.len(), c: 0 }
+        SliceInput { input: s, c: 0 }
     }
 }
 
-impl<'a> BsInput for SliceInput<'a> {
-    fn read_b(&mut self) -> BsReadResult {
+impl<'a> Input for SliceInput<'a> {
+    fn read_b(&mut self) -> InputReadResult {
+        let i = self.input;
         let res;
-        if self.c < self.len {
-            res = Some(self.input[self.c]);
+        if self.c < i.len() {
+            res = Some(i[self.c]);
             self.c += 1;
         } else {
             res = None
@@ -69,8 +75,8 @@ impl<'a, T: Read> BytesInput<'a, T> {
     }
 }
 
-impl<'a, T: Read> BsInput for BytesInput<'a, T> {
-    fn read_b(&mut self) -> BsReadResult {
+impl<'a, T: Read> Input for BytesInput<'a, T> {
+    fn read_b(&mut self) -> InputReadResult {
         match self.input.next() {
             None => Ok(None),
             Some(Ok(r)) => Ok(Some(r)),
