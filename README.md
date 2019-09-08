@@ -1,7 +1,13 @@
 <div align="center">
-<h1>drunken-bishop.rs</h1>
+<h1>bishop.rs</h1>
 
-<a href="https://travis-ci.org/AbsurdlySuspicious/drunken-bishop.rs"><img src="https://travis-ci.org/AbsurdlySuspicious/drunken-bishop.rs.svg?branch=master"></a>
+<a href="https://travis-ci.org/AbsurdlySuspicious/bishop.rs">
+<img src="https://travis-ci.org/AbsurdlySuspicious/bishop.rs.svg?branch=master">
+</a>
+<a href="https://crates.io/crates/bishop">
+<img src="https://img.shields.io/crates/v/bishop">
+</a>
+
 <!--badges-->
 
 <table><tr><td><pre>
@@ -19,100 +25,38 @@
 </pre></td></tr></table>
 </div>
 
-Implementation of The Drunken Bishop visual fingerprint algorithm
-(that one used for so-called *randomarts* in **ssh-keygen**) in Rust.
+Library for visualizing data using The Drunken Bishop algorithm implemented in Rust
 
-Packages:
-+ `drunken-bishop` - Library for visualizing any `&[u8]` or `Read`
-[[crates.io](https://crates.io/crates/drunken-bishop)]
-+ `drunken-bishop-cli` (`bishop`) - CLI app for visualising hex or binary data
-[[crates.io](https://crates.io/crates/drunken-bishop-cli)]
+Drunken Bishop is the algorithm used in OpenSSH's `ssh-keygen` for visualising generated keys 
+
+**CLI app:**
+
+[![GitHub](https://img.shields.io/badge/-GitHub-grey?logo=github)](https://github.com/AbsurdlySuspicious/bishop.rs/tree/master/bishop-cli)
+[![crates.io](https://img.shields.io/badge/-crates.io-orange?logo=rust)](https://crates.io/crates/bishop-cli)
+
+`bishop-cli` (`bishop`) - CLI app for visualising hex or binary data
+
+---
 
 Reference used for this implementation:
 http://www.dirk-loss.de/sshvis/drunken_bishop.pdf
 
-## Examples
+## Example
 
-### Using as command-line utility
+`Cargo.toml`:
 
-**Usage:**
-
-```
-$ drunken-bishop --help
-drunken-bishop 0.1.0
-Visualizes keys and hashes using OpenSSH's Drunken Bishop algorithm
-
-USAGE:
-    drunken-bishop [FLAGS] [OPTIONS] [hex]
-
-FLAGS:
-    -q, --quiet      Don't echo hex input
-        --help       Prints help information
-    -V, --version    Prints version information
-
-OPTIONS:
-    -i <input>               Input file; use '-' for stdin
-        --chars <chars>      Custom char list: '[bg][char]...[start][end]'
-    -w, --width <width>      Field width [default: 17]
-    -h, --height <height>    Field height [default: 9]
-    -t, --top <top>          Top frame text
-    -b, --bot <bot>          Bottom frame text
-
-ARGS:
-    <hex>    Hex input; should have even length
+```toml
+[dependencies]
+bishop = "x.x.x"
 ```
 
-**Passing hex as argument:**
+Use current latest version:
+![Latest version](https://img.shields.io/crates/v/bishop?label=&color=grey) 
 
-`$ bishop $(echo foobar | sha256sum | cut -d' ' -f1)`
-
-```
-Fingerprint of:
-aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f
-
-+-----------------+
-|          . .=*++|
-|         o  o=@=*|
-|    o   . . .*=@.|
-|   o . . .  . E+ |
-|  . . . S +o . =o|
-|   +   . .+o  . o|
-|    o   . oo     |
-|     . .  .o.    |
-|      .  ...     |
-+-----------------+
-```
-
-**Using `-i`**
-
-`$ cat foobar.bin | bishop -i -`
-
-or
-
-`$ bishop -i foobar.bin`
-
-```
-+-----------------+
-|          . .=*++|
-|         o  o=@=*|
-|    o   . . .*=@.|
-|   o . . .  . E+ |
-|  . . . S +o . =o|
-|   +   . .+o  . o|
-|    o   . oo     |
-|     . .  .o.    |
-|      .  ...     |
-+-----------------+
-```
-
-Note that with `-i` option data is treated as **binary**, **not hex** 
-
-### Using as library in my project
-
-Add latest version of library from crates.io to your Cargo.toml, and then:
+`main.rs`:
 
 ```rust
-use drunken_bishop::bishop as bs;
+use bishop::bishop as bs;
 
 use std::io::{Read, BufReader};
 use std::fs::File;
@@ -125,32 +69,16 @@ fn main() {
     let art = bs::art_str(&mut BufReader::new(file).bytes(), &cfg).unwrap();
     println!("{}", art);
 
+    // from vec to String
+    let src = vec![1u8, 3, 3, 7];
+    let art = bs::art_str(&src, &cfg).unwrap();
+    println!("{}", art);
+
     // from slice to stdout
-    let src: Vec<u8> = vec![1, 2, 3, 4, 5];
-    bs::art_print(&src, &cfg, |p| println!("{}", p)).unwrap();
+    let src = [1u8, 2, 3, 4, 5];
+    bs::art_print(src.as_ref(), &cfg, |p| println!("{}", p)).unwrap();
 }
-
 ```
-
-## Help
-
-### Char list
-
-Char list is a string each char of which is treated as:
-
-_indexing starts from 1_
-
-Index  | Description             | Default          |
--------|-------------------------|------------------|
-`1`    | Field background        | ` `              |
-`2..n` | Chars used for drawing  | `.o+=*BOX@%&#/^` |
-`n+1`  | Char for start position | `S`              |
-`n+2`  | Char for last position  | `E`              |
-
-
-Char list must be at least 4 chars long,
-but secure char list is at least 18 chars long
-and only consists of clearly distinguishable symbols.
 
 ## License
 

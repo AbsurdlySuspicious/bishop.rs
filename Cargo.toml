@@ -19,3 +19,6 @@ members = [
 [dependencies]
 unicode-width = "0.1.6"
 custom_error = "1.7.1"
+
+[dev-dependencies]
+hex = "0.3.2"

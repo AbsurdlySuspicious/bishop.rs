@@ -46,6 +46,7 @@ name = "drunken-bishop"
 version = "0.1.0"
 dependencies = [
  "custom_error 1.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hex 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "unicode-width 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

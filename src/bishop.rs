@@ -442,7 +442,7 @@ mod tests {
 
         println!("hex art_str");
         let h = "aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f";
-        let hd = hex::decode(h)?;
+        let hd = hex::decode(h).unwrap();
         println!("{}\n", art_str(hd.as_slice(), &cfg)?);
 
         println!("file art_print");
