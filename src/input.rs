@@ -1,5 +1,5 @@
 use crate::Result;
-use std::io::{self, Bytes, Read};
+use std::io;
 
 pub type InputReadResult = Result<Option<u8>>;
 
