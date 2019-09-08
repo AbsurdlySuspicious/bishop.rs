@@ -1,16 +1,18 @@
 use crate::Result;
-use std::io::{Bytes, Read};
+use std::io::{self, Bytes, Read};
+
+pub type InputReadResult = Result<Option<u8>>;
 
 pub trait AsInput {
     type I: Input;
     fn bs_input(self) -> Self::I;
 }
 
-impl<'a, B: Read> AsInput for &'a mut Bytes<B> {
+impl<'a, B: Iterator<Item = io::Result<u8>>> AsInput for &'a mut B {
     type I = BytesInput<'a, B>;
 
     fn bs_input(self) -> Self::I {
-        BytesInput::new(self)
+        BytesInput { input: self }
     }
 }
 
@@ -29,8 +31,6 @@ impl<'a> AsInput for &'a Vec<u8> {
         SliceInput::new(self.as_slice())
     }
 }
-
-pub type InputReadResult = Result<Option<u8>>;
 
 /// Input acceptable by `walker` and `art_*` functions
 pub trait Input {
@@ -64,17 +64,17 @@ impl<'a> Input for SliceInput<'a> {
     }
 }
 
-pub struct BytesInput<'a, T: Read> {
-    pub input: &'a mut Bytes<T>
+pub struct BytesInput<'a, T: Iterator<Item = io::Result<u8>>> {
+    pub input: &'a mut T
 }
 
-impl<'a, T: Read> BytesInput<'a, T> {
+/*impl<'a, T: Read> BytesInput<'a, T> {
     pub fn new(b: &'a mut Bytes<T>) -> BytesInput<'a, T> {
         BytesInput { input: b }
     }
-}
+}*/
 
-impl<'a, T: Read> Input for BytesInput<'a, T> {
+impl<'a, T: Iterator<Item = io::Result<u8>>> Input for BytesInput<'a, T> {
     fn read_b(&mut self) -> InputReadResult {
         match self.input.next() {
             None => Ok(None),
