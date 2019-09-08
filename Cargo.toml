@@ -1,5 +1,5 @@
 [package]
-name = "drunken-bishop"
+name = "bishop"
 version = "0.1.0"
 authors = ["AbsurdlySuspicious <repom2@airmail.cc>"]
 edition = "2018"
@@ -13,7 +13,7 @@ readme = "README.md"
 
 [workspace]
 members = [
-  "drunken-bishop-cli"
+  "bishop-cli"
 ]
 
 [dependencies]

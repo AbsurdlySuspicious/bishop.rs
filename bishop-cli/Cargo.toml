@@ -1,5 +1,5 @@
 [package]
-name = "drunken-bishop-cli"
+name = "bishop-cli"
 version = "0.1.0"
 authors = ["AbsurdlySuspicious <repom2@airmail.cc>"]
 edition = "2018"
@@ -13,7 +13,7 @@ categories = ["command-line-utilities"]
 readme = "README.md"
 
 [dependencies]
-drunken-bishop = { version = "0.1.0", path = "../"}
+bishop = { version = "0.1.0", path = "../"}
 structopt = "0.3"
 custom_error = "1.7.1"
 hex = "0.3.2"

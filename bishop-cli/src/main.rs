@@ -1,6 +1,6 @@
 #[macro_use] extern crate custom_error;
 
-use drunken_bishop::{bishop::*, _raise, BishopError};
+use bishop::{bishop::*, _raise, BishopError};
 use structopt::StructOpt;
 use std::path::PathBuf;
 use std::io::{self, Read, BufReader};
