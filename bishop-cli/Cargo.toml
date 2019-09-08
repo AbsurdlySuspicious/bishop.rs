@@ -6,14 +6,13 @@ edition = "2018"
 
 description = "CLI app for visualizing keys and hashes using OpenSSH's Drunken Bishop algorithm"
 license = "Apache-2.0/MIT"
-documentation = "https://docs.rs/drunken-bishop"
-repository = "https://github.com/AbsurdlySuspicious/drunken-bishop.rs"
+repository = "https://github.com/AbsurdlySuspicious/bishop.rs"
 keywords = ["cli", "fingerprint", "visialization", "key-visialization"]
 categories = ["command-line-utilities"]
 readme = "README.md"
 
 [dependencies]
-bishop = { version = "0.1.0", path = "../"}
+bishop = { version = "0.1.1", path = "../"}
 structopt = "0.3"
 custom_error = "1.7.1"
 hex = "0.3.2"

@@ -19,7 +19,7 @@ dependencies = [
 
 [[package]]
 name = "bishop"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "custom_error 1.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "hex 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -30,7 +30,7 @@ dependencies = [
 name = "bishop-cli"
 version = "0.1.0"
 dependencies = [
- "bishop 0.1.0",
+ "bishop 0.1.1",
  "custom_error 1.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "hex 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "structopt 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",

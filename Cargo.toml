@@ -1,13 +1,13 @@
 [package]
 name = "bishop"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["AbsurdlySuspicious <repom2@airmail.cc>"]
 edition = "2018"
 
 description = "Library for visualizing keys and hashes using OpenSSH's Drunken Bishop algorithm"
 license = "Apache-2.0/MIT"
-documentation = "https://docs.rs/drunken-bishop"
-repository = "https://github.com/AbsurdlySuspicious/drunken-bishop.rs"
+documentation = "https://docs.rs/bishop"
+repository = "https://github.com/AbsurdlySuspicious/bishop.rs"
 keywords = ["fingerprint", "visialization", "key-visialization"]
 readme = "README.md"
 
