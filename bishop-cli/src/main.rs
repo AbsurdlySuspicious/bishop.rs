@@ -65,11 +65,11 @@ struct Opts {
     height: usize,
 
     /// Top frame text
-    #[structopt(short, long, display_order = 401)]
+    #[structopt(long, display_order = 401)]
     top: Option<String>,
 
     /// Bottom frame text
-    #[structopt(short, long, display_order = 402)]
+    #[structopt(long, display_order = 402)]
     bot: Option<String>,
 }
 

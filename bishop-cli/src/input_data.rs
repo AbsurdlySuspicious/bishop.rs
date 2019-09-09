@@ -23,6 +23,7 @@ pub struct HexInput<R: Read> {
 
 impl<R: Read> HexInput<R> {
     pub fn new(b: R) -> Self {
+        assert_eq!(HEX_BUF_SIZE % 2, 0);
         HexInput { b, buf: vec![], len: 0, read: 0 }
     }
 }
@@ -34,7 +35,7 @@ impl<R: Read> Input for HexInput<R> {
         if self.read >= self.len {
             let mut h_buf = [0u8; HEX_BUF_SIZE];
 
-            let h_len = loop {
+            let mut h_len = loop {
                 match self.b.read(&mut h_buf) {
                     Err(ref e) if e.kind() == ErrorKind::Interrupted => continue,
                     Err(e) => return Err(e.into()),
@@ -42,6 +43,22 @@ impl<R: Read> Input for HexInput<R> {
                     Ok(x) => break x
                 };
             };
+
+            // eliminate dangling line feeds
+            let raw_ln = h_len;
+            for i in 1..=raw_ln {
+                let l = h_buf[raw_ln - i];
+                if l == b'\n' || l == b'\r' {
+                    h_len -= 1;
+                } else {
+                    break;
+                }
+            }
+
+            // exit if buffer was full of line feeds
+            if h_len == 0 {
+                return Ok(None)
+            }
 
             let () = match hex::decode(&h_buf[..h_len]) {
                 Err(e) => _raise(format!("Hex parser error: {}", e))?,
