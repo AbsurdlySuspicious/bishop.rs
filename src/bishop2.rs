@@ -2,6 +2,7 @@ use crate::vec2d::*;
 use crate::{_raise, Result};
 
 use unicode_width::*;
+use std::io::{self, Write};
 
 pub type CharList = Vec<char>;
 pub type FieldXY = Vec2D<isize>;
@@ -264,6 +265,21 @@ impl BishopArt {
         self.result().draw()
     }
 
+}
+
+impl Write for BishopArt {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        let ln = buf.len();
+        if ln > 0 {
+            self.input(buf);
+        }
+
+        Ok(ln)
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        Ok(())
+    }
 }
 
 impl BishopResult {
