@@ -1,7 +1,7 @@
 mod input_data;
 
 #[macro_use] extern crate custom_error;
-use bishop::{bishop::*, _raise, BishopError};
+use bishop::{bishop::*, BishopError};
 use structopt::StructOpt;
 use structopt::clap::arg_enum;
 use std::path::PathBuf;
@@ -13,7 +13,8 @@ use input_data::*;
 custom_error!{ BishopCliError
     Hex{source: hex::FromHexError} = "Hex parse: {source}",
     Io{source: io::Error} = "IO: {source}",
-    Other{source: BishopError} = "{source}"
+    Bishop{source: BishopError} = "{source}",
+    Other{msg: String} = "{msg}"
 }
 
 arg_enum! {
@@ -26,6 +27,14 @@ arg_enum! {
 }
 
 use InputType::*;
+
+fn _raise_bs<R, S: Into<String>>(m: S) -> Result<R, BishopError> {
+    Err(BishopError::Err { msg: m.into() })
+}
+
+fn _raise<R, S: Into<String>>(m: S) -> Result<R, BishopCliError> {
+    Err(BishopCliError::Other { msg: m.into() })
+}
 
 /// Visualizes keys and hashes using OpenSSH's Drunken Bishop algorithm
 #[derive(StructOpt, Debug)]

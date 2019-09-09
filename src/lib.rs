@@ -7,6 +7,7 @@ pub mod bishop;
 pub mod input;
 mod vec2d;
 
+/// Local result type
 pub type Result<T> = result::Result<T, BishopError>;
 
 custom_error! {pub BishopError
@@ -14,6 +15,6 @@ custom_error! {pub BishopError
     Err{msg: String} = "{msg}"
 }
 
-pub fn _raise<R, S: Into<String>>(m: S) -> Result<R> {
+fn _raise<R, S: Into<String>>(m: S) -> Result<R> {
     Err(BishopError::Err { msg: m.into() })
 }

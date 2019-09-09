@@ -1,4 +1,5 @@
-use bishop::{input::Input, Result, _raise};
+use crate::_raise_bs;
+use bishop::{input::Input, Result};
 use std::io::{Read, ErrorKind};
 use bishop::input::AsInput;
 
@@ -57,7 +58,7 @@ impl<R: Read> Input for HexInput<R> {
 
                 if h_len != 0 && self.has_lf {
                     // return error if there's data left after dangling linefeeds
-                    return _raise("HexInput: linefeeds in the middle of data")
+                    return _raise_bs("HexInput: linefeeds in the middle of data")
                 } else if raw_ln != h_len {
                     // mark that linefeeds has been encountered
                     self.has_lf = true
@@ -72,7 +73,7 @@ impl<R: Read> Input for HexInput<R> {
             };
 
             let () = match hex::decode(&h_buf[..h_len]) {
-                Err(e) => _raise(format!("HexInput: {}", e))?,
+                Err(e) => _raise_bs(format!("HexInput: {}", e))?,
                 Ok(v) => *buf = v
             };
 
