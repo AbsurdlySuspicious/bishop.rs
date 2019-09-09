@@ -8,6 +8,8 @@ pub mod bishop2;
 pub mod input;
 mod vec2d;
 
+pub use bishop2::{BishopArt, BishopResult, DrawingOptions};
+
 /// Local result type
 pub type Result<T> = result::Result<T, BishopError>;
 
