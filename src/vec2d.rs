@@ -28,6 +28,10 @@ impl<T: Clone> Vec2D<T> {
         &mut self.0[y as usize][x as usize]
     }
 
+    pub fn get_row(&self, y: usize) -> &Vec<T> {
+        &self.0[y]
+    }
+
     pub fn into_vec(self) -> InnerVec<T> {
         self.0
     }

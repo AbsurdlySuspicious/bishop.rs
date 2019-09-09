@@ -1,5 +1,4 @@
 use crate::vec2d::*;
-use crate::input::*;
 use crate::{_raise, Result};
 
 use unicode_width::*;
@@ -136,10 +135,6 @@ impl BishopArt {
     /// [`GEOMETRY_LIMITS_MIN`]: ./constant.GEOMETRY_LIMITS_MIN.html
     /// [`GEOMETRY_LIMITS_MAX`]: ./constant.GEOMETRY_LIMITS_MAX.html
     pub fn with_size(w: usize, h: usize) -> Result<BishopArt> {
-        if chars.len() < 4 {
-            return _raise("Char list must be 4 chars or longer");
-        }
-
         let ((min_w, min_h), (max_w, max_h)) =
             (GEOMETRY_LIMITS_MIN, GEOMETRY_LIMITS_MAX);
 
@@ -195,9 +190,9 @@ impl BishopArt {
     ///
     /// [`result()`]: ./struct.BishopArt.html#method.result
     pub fn input<T: AsRef<[u8]>>(&mut self, i: T) {
-        for byte in i {
+        for &byte in i.as_ref() {
             for &(a, b) in &bit_pairs(byte) {
-                let pos = mov(self.pos, a, b);
+                let pos = self.mov(self.pos, a, b);
                 let p = &mut self.map[pos];
                 let v = *p;
 
@@ -288,12 +283,99 @@ impl BishopResult {
         &self.field
     }
 
+    fn fill_dash(s: &mut String, c: usize) {
+        for _ in 0..c { s.push('-') }
+    }
+
     /// Draw resulting field to String using
     /// parameters from [`DrawingOptions`]
     ///
+    /// # Panics
+    ///
+    /// This function panics if char list length
+    /// is less than 4 or more than isize::MAX
+    ///
     /// [`DrawingOptions`]: ./struct.DrawingOptions.html
     pub fn draw_with_opts(&self, o: &DrawingOptions) -> String {
-        unimplemented!()
+
+        let (w, h) = self.size;
+        let chr: &Vec<char> = &o.chars;
+        let chr_ln = chr.len();
+
+        if chr_ln < 4 || chr_ln > (std::isize::MAX as usize) {
+            panic!("Char list length must be 4 <= n <= isize::MAX");
+        }
+
+        let chr_sub_ln = (chr_ln - 2) as isize; // length w/o SE chars
+        let (&chr_last, &chr_s, &chr_e) = match &chr[chr_ln - 3..] {
+            [l, s, e] => (l, s, e),
+            _ => unreachable!()
+        };
+
+        let v_frame = |s: &mut String, text: &str| {
+            s.push('+');
+            if text.is_empty() {
+                Self::fill_dash(s, w - 2)
+            } else {
+                let (text_idx, text_ln) = {
+                    let real_w = w - 2;
+                    let mut size = 0usize;
+                    let mut last = 0usize;
+
+                    for (i, c) in text.char_indices() {
+                        let sz = size + c.width().unwrap_or(0);
+                        if sz < real_w {
+                            last = i + c.len_utf8();
+                            size = sz;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    (last, size)
+                };
+
+                let fill_w = w - (text_ln + 2);
+                let (dash, pad) = (fill_w / 2, fill_w % 2);
+                Self::fill_dash(s, dash);
+                s.push('[');
+                s.push_str(&text[..text_idx]);
+                s.push(']');
+                Self::fill_dash(s, dash + pad);
+            }
+            s.push_str("+\n");
+        };
+
+        let line = |s: &mut String, y: usize| {
+            let row = self.field.get_row(y);
+            s.push('|');
+            for x in 0..(w - 2) {
+                let c = match row[x] {
+                    VALUE_E => chr_e,
+                    VALUE_S => chr_s,
+                    v if v < 0 => unreachable!(),
+                    v if v < chr_sub_ln => chr[v as usize],
+                    _ => chr_last
+                };
+                s.push(c);
+            }
+            s.push_str("|\n")
+        };
+
+        // (width + 2x pipe + \n) * (height + top + bottom)
+        let cap = (w + 3) * (h + 2);
+        let mut out = String::with_capacity(cap);
+
+        v_frame(&mut out, &o.top_text);
+
+        for y in 0..h {
+            line(&mut out, y);
+        }
+
+        v_frame(&mut out, &o.bottom_text);
+
+        eprintln!("draw cap: {}, real cap: {}", cap, out.capacity());
+        out
     }
 
     /// Draw resulting field to String using default parameters
