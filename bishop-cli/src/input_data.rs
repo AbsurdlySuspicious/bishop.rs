@@ -1,6 +1,6 @@
-use crate::_raise_bs;
+use crate::{_raise_bs, BishopCliError};
 use bishop::{input::Input, Result};
-use std::io::{Read, ErrorKind};
+use std::io::{self, Read, ErrorKind};
 use bishop::input::AsInput;
 
 pub struct InputItself<T: Input>(pub T);
@@ -11,6 +11,10 @@ impl<T: Input> AsInput for InputItself<T> {
     fn bs_input(self) -> Self::I {
         self.0
     }
+}
+
+fn _raise_io<S: Into<String>, T>(m: S) -> io::Result<T> {
+    Err(io::Error::new(ErrorKind::Other, BishopCliError::Other { msg: m.into() }))
 }
 
 const HEX_BUF_SIZE: usize = 64;
@@ -27,6 +31,60 @@ impl<R: Read> HexInput<R> {
     pub fn new(b: R) -> Self {
         assert_eq!(HEX_BUF_SIZE % 2, 0);
         HexInput { b, buf: vec![], len: 0, read: 0, has_lf: false }
+    }
+}
+
+impl<R: Read> Read for HexInput<R> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        let mut h_buf = [0u8; HEX_BUF_SIZE];
+        let out_len = buf.len();
+        let h_len = HEX_BUF_SIZE.min((out_len - (out_len % 2)) * 2);
+
+        let mut rd_len = loop {
+            match self.b.read(&mut h_buf[..h_len]) {
+                Err(ref e) if e.kind() == ErrorKind::Interrupted => continue,
+                Err(e) => return Err(e.into()),
+                Ok(0) => return Ok(0),
+                Ok(x) => break x
+            };
+        };
+
+        if self.has_lf {
+            return _raise_io("Data after linefeed");
+        }
+
+        // eliminate dangling linefeeds
+        let rd_raw = rd_len;
+        for i in 1..=rd_raw {
+            let l = h_buf[rd_raw - i];
+            if l == b'\n' || l == b'\r' {
+                rd_len -= 1;
+            } else {
+                break;
+            }
+        }
+
+        let rd_delta = rd_raw - rd_len;
+        if rd_delta > 2 {
+            return _raise_io("More than one dangling linefeed")
+        } else if rd_delta != 0 {
+            self.has_lf = true;
+        }
+
+        let dec = match hex::decode(&h_buf[..rd_len]) {
+            Ok(v) => v,
+            Err(e) => return _raise_io(format!("{}", e))
+        };
+
+        if dec.len() > out_len {
+            panic!("small out buf");
+        }
+
+        for i in 0..dec.len() {
+            buf[i] = dec[i]
+        }
+
+        Ok(rd_raw)
     }
 }
 
