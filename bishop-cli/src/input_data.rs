@@ -18,13 +18,14 @@ pub struct HexInput<R: Read> {
     b: R,
     buf: Vec<u8>,
     len: usize,
-    read: usize
+    read: usize,
+    has_lf: bool
 }
 
 impl<R: Read> HexInput<R> {
     pub fn new(b: R) -> Self {
         assert_eq!(HEX_BUF_SIZE % 2, 0);
-        HexInput { b, buf: vec![], len: 0, read: 0 }
+        HexInput { b, buf: vec![], len: 0, read: 0, has_lf: false }
     }
 }
 
@@ -35,33 +36,43 @@ impl<R: Read> Input for HexInput<R> {
         if self.read >= self.len {
             let mut h_buf = [0u8; HEX_BUF_SIZE];
 
-            let mut h_len = loop {
-                match self.b.read(&mut h_buf) {
+            let h_len = loop {
+                let mut h_len = match self.b.read(&mut h_buf) {
                     Err(ref e) if e.kind() == ErrorKind::Interrupted => continue,
                     Err(e) => return Err(e.into()),
                     Ok(0) => return Ok(None),
-                    Ok(x) => break x
+                    Ok(x) => x
                 };
+
+                // eliminate dangling linefeeds
+                let raw_ln = h_len;
+                for i in 1..=raw_ln {
+                    let l = h_buf[raw_ln - i];
+                    if l == b'\n' || l == b'\r' {
+                        h_len -= 1;
+                    } else {
+                        break;
+                    }
+                }
+
+                if h_len != 0 && self.has_lf {
+                    // return error if there's data left after dangling linefeeds
+                    return _raise("HexInput: linefeeds in the middle of data")
+                } else if raw_ln != h_len {
+                    // mark that linefeeds has been encountered
+                    self.has_lf = true
+                }
+
+                // try again if buffer was full of linefeeds
+                if h_len == 0 {
+                    continue
+                }
+
+                break h_len;
             };
 
-            // eliminate dangling line feeds
-            let raw_ln = h_len;
-            for i in 1..=raw_ln {
-                let l = h_buf[raw_ln - i];
-                if l == b'\n' || l == b'\r' {
-                    h_len -= 1;
-                } else {
-                    break;
-                }
-            }
-
-            // exit if buffer was full of line feeds
-            if h_len == 0 {
-                return Ok(None)
-            }
-
             let () = match hex::decode(&h_buf[..h_len]) {
-                Err(e) => _raise(format!("Hex parser error: {}", e))?,
+                Err(e) => _raise(format!("HexInput: {}", e))?,
                 Ok(v) => *buf = v
             };
 

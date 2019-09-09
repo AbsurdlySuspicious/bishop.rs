@@ -95,9 +95,6 @@ fn str_opt<'a>(s: &'a Option<String>, d: &'static str) -> &'a str {
 fn main_() -> Result<(), BishopCliError> {
     let o = Opts::from_args();
 
-    println!("{:#?}", o);
-    //_raise("heh")?;
-
     let cfg = Options::new(
         (o.width, o.height),
         str_opt(&o.chars, DEFAULT_CHARS),
