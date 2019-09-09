@@ -1,5 +1,5 @@
 use crate::vec2d::*;
-use crate::{_raise, Result};
+use crate::{_raise, result::Result};
 
 use unicode_width::*;
 use std::io::{self, Write};
@@ -390,7 +390,7 @@ impl BishopResult {
 
         v_frame(&mut out, &o.bottom_text);
 
-        eprintln!("draw cap: {}, real cap: {}", cap, out.capacity());
+        //eprintln!("draw cap: {}, real cap: {}", cap, out.capacity());
         out
     }
 

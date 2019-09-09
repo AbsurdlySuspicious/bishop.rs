@@ -1,5 +1,5 @@
 use crate::{_raise_bs, BishopCliError};
-use bishop::{input::Input, Result};
+use bishop::{input::Input, result::Result};
 use std::io::{self, Read, ErrorKind};
 use bishop::input::AsInput;
 

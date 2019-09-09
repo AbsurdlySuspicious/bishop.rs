@@ -1,4 +1,4 @@
-use crate::Result;
+use crate::result::Result;
 use std::io;
 
 pub type InputReadResult = Result<Option<u8>>;

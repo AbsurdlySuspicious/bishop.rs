@@ -1,7 +1,7 @@
 mod input_data;
 
 #[macro_use] extern crate custom_error;
-use bishop::{bishop::*, BishopError};
+use ::bishop::{*, bishop2::DEFAULT_CHARS};
 use structopt::StructOpt;
 use structopt::clap::arg_enum;
 use std::path::PathBuf;
@@ -82,17 +82,13 @@ struct Opts {
     bot: Option<String>,
 }
 
-fn print(s: &String) {
-    println!("{}", s);
-}
-
-fn p_input<R: Read>(r: R, t: &InputType, cfg: &Options) -> Result<(), BishopError> {
+fn art_from_read<R: Read>(mut r: R, t: &InputType, art: &mut BishopArt) -> io::Result<u64> {
     match t {
         Hash => unimplemented!(),
-        Bin => art_print(&mut r.bytes(), cfg, print),
+        Bin => io::copy(&mut r, art),
         Hex => {
-            let i = InputItself(HexInput::new(r));
-            art_print(i, cfg, print)
+            let mut i = HexInput::new(r);
+            io::copy(&mut i, art)
         }
     }
 }
@@ -104,12 +100,13 @@ fn str_opt<'a>(s: &'a Option<String>, d: &'static str) -> &'a str {
 fn main_() -> Result<(), BishopCliError> {
     let o = Opts::from_args();
 
-    let cfg = Options::new(
-        (o.width, o.height),
-        str_opt(&o.chars, DEFAULT_CHARS),
-        str_opt(&o.top, ""),
-        str_opt(&o.bot, "")
-    )?;
+    let draw_opts = DrawingOptions {
+        chars: str_opt(&o.chars, DEFAULT_CHARS).chars().collect(),
+        top_text: str_opt(&o.top, "").to_string(),
+        bottom_text: str_opt(&o.bot, "").to_string()
+    };
+
+    let mut art = BishopArt::with_size(o.width, o.height)?;
 
     let input_t_set = o.input_type.is_some();
     let input_t = o.input_type.unwrap_or(Bin);
@@ -118,16 +115,16 @@ fn main_() -> Result<(), BishopCliError> {
     let () = match (&o.input, o.hex) {
         (Some(d), None) if *d == dash => {
             let bf = io::stdin();
-            p_input(bf.lock(), &input_t, &cfg)?
-        },
+            art_from_read(bf.lock(), &input_t, &mut art)?;
+        }
         (Some(i), None) => {
             let f = File::open(i)?;
             let bf = BufReader::new(f);
-            p_input(bf, &input_t, &cfg)?
-        },
+            art_from_read(bf, &input_t, &mut art)?;
+        }
         (None, Some(h)) => {
             if input_t_set {
-                _raise("-T can be used with -i only")?
+                _raise("-T can be used with -i only")?;
             }
 
             if !o.quiet {
@@ -135,12 +132,15 @@ fn main_() -> Result<(), BishopCliError> {
             }
 
             let d = hex::decode(h)?;
-            art_print(d.as_slice(), &cfg, print)?
-        },
+            art.input(d);
+        }
         _ => _raise(
             "Either -i OR <hex> should be specified\n\
             Check --help for usage")?
     };
+
+    let res = art.draw_with_opts(&draw_opts);
+    print!("{}", res);
 
     Ok(())
 }

@@ -1,6 +1,6 @@
 use crate::vec2d::*;
 use crate::input::*;
-use crate::{_raise, Result};
+use crate::{_raise, result::Result};
 
 use unicode_width::*;
 
