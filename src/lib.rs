@@ -4,6 +4,7 @@ use std::io;
 use std::result;
 
 pub mod bishop;
+pub mod bishop2;
 pub mod input;
 mod vec2d;
 
