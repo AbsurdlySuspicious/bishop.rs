@@ -3,7 +3,6 @@
 use std::io;
 
 pub mod bishop2;
-pub mod result;
 mod vec2d;
 
 pub use bishop2::{BishopArt, BishopResult, DrawingOptions};
@@ -15,4 +14,12 @@ custom_error! {pub BishopError
 
 fn _raise<R, S: Into<String>>(m: S) -> result::Result<R> {
     Err(BishopError::Err { msg: m.into() })
+}
+
+pub mod result {
+    use std::result;
+    use crate::BishopError;
+
+    /// Local result type
+    pub type Result<T> = result::Result<T, BishopError>;
 }
