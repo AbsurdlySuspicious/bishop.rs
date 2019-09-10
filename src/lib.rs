@@ -2,10 +2,10 @@
 
 use std::io;
 
-pub mod bishop2;
+pub mod bishop;
 mod vec2d;
 
-pub use bishop2::{BishopArt, BishopResult, DrawingOptions};
+pub use bishop::{BishopArt, BishopResult, DrawingOptions};
 
 custom_error! {pub BishopError
     Io{source: io::Error} = "IO: {source}",

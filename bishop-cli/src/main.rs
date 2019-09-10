@@ -1,7 +1,7 @@
 mod input_data;
 
 #[macro_use] extern crate custom_error;
-use ::bishop::{*, bishop2::DEFAULT_CHARS};
+use ::bishop::{*, bishop::DEFAULT_CHARS};
 use structopt::StructOpt;
 use structopt::clap::arg_enum;
 use std::path::PathBuf;
