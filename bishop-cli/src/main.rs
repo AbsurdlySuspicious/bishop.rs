@@ -28,10 +28,6 @@ arg_enum! {
 
 use InputType::*;
 
-fn _raise_bs<R, S: Into<String>>(m: S) -> Result<R, BishopError> {
-    Err(BishopError::Err { msg: m.into() })
-}
-
 fn _raise<R, S: Into<String>>(m: S) -> Result<R, BishopCliError> {
     Err(BishopCliError::Other { msg: m.into() })
 }

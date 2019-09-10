@@ -2,9 +2,7 @@
 
 use std::io;
 
-pub mod bishop;
 pub mod bishop2;
-pub mod input;
 pub mod result;
 mod vec2d;
 
