@@ -17,7 +17,7 @@ fn _raise_io<S: Into<String>, T>(m: S) -> io::Result<T> {
     Err(io::Error::new(ErrorKind::Other, BishopCliError::Other { msg: m.into() }))
 }
 
-const HEX_BUF_SIZE: usize = 64;
+const HEX_BUF_SIZE: usize = 128;
 
 pub struct HexInput<R: Read> {
     b: R,
@@ -71,20 +71,31 @@ impl<R: Read> Read for HexInput<R> {
             self.has_lf = true;
         }
 
+        if rd_len == 0 {
+            return Ok(0)
+        }
+
+        /*eprintln!(
+            "h_buf: {:?}\nout_len: {}, h_len: {}, rd_raw: {}, rd_len: {}, rd_delta: {}",
+            &h_buf[..], out_len, h_len, rd_raw, rd_len, rd_delta
+        );*/
+
         let dec = match hex::decode(&h_buf[..rd_len]) {
             Ok(v) => v,
             Err(e) => return _raise_io(format!("{}", e))
         };
 
-        if dec.len() > out_len {
+        let dec_ln = dec.len();
+
+        if dec_ln > out_len {
             panic!("small out buf");
         }
 
-        for i in 0..dec.len() {
+        for i in 0..dec_ln {
             buf[i] = dec[i]
         }
 
-        Ok(rd_raw)
+        Ok(dec_ln)
     }
 }
 
