@@ -58,7 +58,7 @@ fn bit_pairs(byte: u8) -> [(bool, bool); 4] {
     pairs
 }
 
-/// Options for drawing method
+/// Options for drawing methods
 pub struct DrawingOptions {
     /// Vector of chars used for fingerprint
     ///
@@ -323,7 +323,7 @@ impl BishopResult {
         }
 
         let chr_sub_ln = (chr_ln - 2) as isize; // length w/o SE chars
-        let (&chr_last, &chr_s, &chr_e) = match &chr[chr_ln - 3..] {
+        let (chr_last, chr_s, chr_e) = match chr[chr_ln - 3..] {
             [l, s, e] => (l, s, e),
             _ => unreachable!()
         };
