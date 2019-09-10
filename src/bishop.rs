@@ -400,3 +400,5 @@ impl BishopResult {
     }
 
 }
+
+// TODO tests
