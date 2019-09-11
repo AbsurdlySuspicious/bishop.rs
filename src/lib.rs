@@ -2,10 +2,11 @@
 
 use std::io;
 
-pub mod bishop;
+/// Module taht does the thing
+pub mod bishop_art;
 mod vec2d;
 
-pub use bishop::{BishopArt, BishopResult, DrawingOptions};
+pub use bishop_art::{BishopArt, BishopResult, DrawingOptions};
 
 custom_error! {pub BishopError
     Io{source: io::Error} = "IO: {source}",

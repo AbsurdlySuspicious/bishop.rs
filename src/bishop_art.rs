@@ -211,7 +211,7 @@ impl BishopArt {
     /// # Example
     ///
     /// ```rust
-    /// use bishop::bishop::BishopArt;
+    /// use bishop::bishop_art::BishopArt;
     /// let art = BishopArt::new().chain(b"foo").chain(b"bar").draw();
     /// ```
     ///
