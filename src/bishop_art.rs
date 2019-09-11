@@ -211,12 +211,15 @@ impl BishopArt {
     /// # Example
     ///
     /// ```rust
-    /// use bishop::bishop_art::BishopArt;
-    /// let art = BishopArt::new().chain(b"foo").chain(b"bar").draw();
+    /// # use bishop::*;
+    /// let art = BishopArt::new()
+    ///     .chain(b"foo")
+    ///     .chain(b"bar")
+    ///     .draw();
     /// ```
     ///
     /// [`input()`]: ./struct.BishopArt.html#method.input
-    pub fn chain<T: AsRef<[u8]>>(&mut self, i: T) -> &mut Self {
+    pub fn chain<T: AsRef<[u8]>>(mut self, i: T) -> Self {
         self.input(i);
         self
     }
