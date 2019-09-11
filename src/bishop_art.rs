@@ -8,13 +8,13 @@ pub type CharList = Vec<char>;
 pub type FieldXY = Vec2D<isize>;
 pub type PosXY = (usize, usize);
 
-/// Maximum size for a field (x, y): (500, 500)
+/// Maximum size for a field (x, y): `(500, 500)`
 pub const GEOMETRY_LIMITS_MAX: PosXY = (500, 500);
 
-/// Minimum size for a field (x, y): (5, 5)
+/// Minimum size for a field (x, y): `(5, 5)`
 pub const GEOMETRY_LIMITS_MIN: PosXY = (5, 5);
 
-/// Default field size (x, y): (17, 9)
+/// Default field size (x, y): `(17, 9)`
 pub const DEFAULT_SIZE_WH: PosXY = (17, 9);
 
 /// Default char list (see [`DrawingOptions`])
@@ -334,7 +334,7 @@ impl BishopResult {
         let v_frame = |s: &mut String, text: &str| {
             s.push('+');
             if text.is_empty() {
-                Self::fill_dash(s, w - 2)
+                Self::fill_dash(s, w)
             } else {
                 let (text_idx, text_ln) = {
                     let real_w = w - 2;
@@ -368,7 +368,7 @@ impl BishopResult {
         let line = |s: &mut String, y: usize| {
             let row = self.field.get_row(y);
             s.push('|');
-            for x in 0..(w - 2) {
+            for x in 0..w {
                 let c = match row[x] {
                     VALUE_E => chr_e,
                     VALUE_S => chr_s,
@@ -404,4 +404,115 @@ impl BishopResult {
 
 }
 
-// TODO tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+
+    #[test]
+    fn test_is_bit_set() {
+        let set = [
+            (0xfc_u8, [1, 1, 1, 1, 1, 1, 0, 0]),
+            (0xed_u8, [1, 1, 1, 0, 1, 1, 0, 1]),
+        ];
+
+        for (num, bits) in &set {
+            for (i, b) in bits.iter().enumerate() {
+                assert_eq!(bit_set_le(*num, i as u8), *b == 1);
+            }
+        }
+    }
+
+    #[test]
+    fn test_bit_pairs() {
+        let n = 0xf4_u8;
+        let nb: Vec<_> = [(1, 1), (1, 1), (0, 1), (0, 0)]
+            .iter()
+            .rev()
+            .map(|(a, b)| (*a == 1, *b == 1))
+            .collect();
+
+        assert_eq!(bit_pairs(n)[..], nb[..]);
+    }
+
+    // reference arts are taken from page 16 of specification
+    // http://www.dirk-loss.de/sshvis/drunken_bishop.pdf
+
+    const REF_ARTS: &[(&str, &str)] = &[
+        ("fc94b0c1e5b0987c5843997697ee9fb7", "\
++-----------------+
+|       .=o.  .   |
+|     . *+*. o    |
+|      =.*..o     |
+|       o + ..    |
+|        S o.     |
+|         o  .    |
+|          .  . . |
+|              o .|
+|               E.|
++-----------------+\n"),
+        ("731ee54c82233359e3d5e9f6ccf87e1f", "\
++-----------------+
+|        o .. .   |
+|       + +  o    |
+|      = + ..o    |
+|       + . *o    |
+|        S o.o=   |
+|         + .. +  |
+|          .  . E |
+|              . o|
+|             ...o|
++-----------------+\n"),
+    ];
+
+    #[test]
+    fn test_draw_ref() {
+        let opts = DrawingOptions::default();
+
+        for (hash, art) in REF_ARTS {
+            let b = hex::decode(hash).unwrap();
+
+            let out = BishopArt::new()
+                .chain(b)
+                .draw_with_opts(&opts);
+
+            println!("a_line | r_line");
+            for (a_line, r_line) in art.lines().zip(out.lines()) {
+                println!("{} {}", a_line, r_line);
+            }
+
+            assert_eq!(out, *art);
+        }
+    }
+
+    #[test]
+    fn test_walker_ref() {
+        let mut chars = HashMap::new();
+        let cl = DEFAULT_CHARS.len();
+
+        for (i, c) in DEFAULT_CHARS.chars().enumerate() {
+            let ir = match i {
+                i if i == cl - 1 => VALUE_E,
+                i if i == cl - 2 => VALUE_S,
+                i => i as isize
+            };
+            chars.insert(c, ir);
+        }
+
+        for (hash, art) in REF_ARTS {
+            let ref_f: Vec<_> = art.lines()
+                .filter(|l| !l.starts_with('+'))
+                .map(|l| l.trim_matches('|'))
+                .map(|l| l.chars().map(|c| chars[&c]).collect::<Vec<_>>())
+                .collect();
+
+            let data = hex::decode(hash).unwrap();
+            let r = BishopArt::new().chain(data).result();
+
+            println!("ref: {}, r: {}", ref_f.len(), r.field.vec().len());
+            assert_eq!(Vec2D(ref_f), r.field);
+        }
+    }
+
+
+}

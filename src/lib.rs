@@ -2,7 +2,7 @@
 
 use std::io;
 
-/// Module taht does the thing
+/// Module that does the thing
 pub mod bishop_art;
 mod vec2d;
 
@@ -17,6 +17,7 @@ fn _raise<R, S: Into<String>>(m: S) -> result::Result<R> {
     Err(BishopError::Err { msg: m.into() })
 }
 
+/// Module with custom result type
 pub mod result {
     use std::result;
     use crate::BishopError;
