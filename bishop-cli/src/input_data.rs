@@ -1,8 +1,17 @@
 use crate::BishopCliError;
 use std::io::{self, Read, ErrorKind};
+use sha2::{Digest, Sha256};
 
 fn _raise_io<S: Into<String>, T>(m: S) -> io::Result<T> {
     Err(io::Error::new(ErrorKind::Other, BishopCliError::Other { msg: m.into() }))
+}
+
+pub type HashArray = [u8; 32];
+
+pub fn hash_input<R: Read>(r: &mut R) -> io::Result<HashArray> {
+    let mut h = Sha256::new();
+    io::copy(r, &mut h)?;
+    Ok(h.result().into())
 }
 
 const HEX_BUF_SIZE: usize = 128;

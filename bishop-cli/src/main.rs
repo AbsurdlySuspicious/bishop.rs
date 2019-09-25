@@ -80,8 +80,11 @@ struct Opts {
 
 fn art_from_read<R: Read>(mut r: R, t: &InputType, art: &mut BishopArt) -> io::Result<u64> {
     match t {
-        Hash => unimplemented!(),
         Bin => io::copy(&mut r, art),
+        Hash => {
+            let a = hash_input(&mut r)?;
+            io::copy(&mut a.as_ref(), art)
+        },
         Hex => {
             let mut i = HexInput::new(r);
             io::copy(&mut i, art)

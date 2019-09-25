@@ -16,6 +16,7 @@ bishop = { version = "0.1.1", path = "../"}
 structopt = "0.3"
 custom_error = "1.7.1"
 hex = "0.3.2"
+sha2 = "0.8.0"
 
 [[bin]]
 path = "src/main.rs"
