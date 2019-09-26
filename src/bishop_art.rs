@@ -100,6 +100,12 @@ impl DrawingOptions {
     }
 }
 
+impl Default for DrawingOptions {
+    fn default() -> Self {
+        DrawingOptions::default()
+    }
+}
+
 /// Resulting field from [`BishopArt`]
 ///
 /// [`BishopArt`]: ./struct.BishopArt.html
