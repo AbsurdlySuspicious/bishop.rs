@@ -170,3 +170,63 @@ fn main() {
         std::process::exit(1);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use sha2::{Sha256, Digest};
+    use rand::prelude::*;
+
+    use std::error::{Error as StdError};
+    type StdResult = Result<(), Box<dyn StdError>>;
+
+    #[test]
+    fn test_hash_input() -> StdResult {
+        let mut data = [0u8; 64];
+        thread_rng().fill_bytes(&mut data);
+
+        let ref_hash: [u8; 32] = Sha256::new().chain(data.as_ref()).result().into();
+        let ref_art = BishopArt::new().chain(ref_hash).draw();
+
+        let mut art_inst = BishopArt::new();
+        art_from_read(data.as_ref(), &InputType::Hash, &mut art_inst)?;
+        let chk_art = art_inst.draw();
+
+        assert_eq!(ref_art, chk_art);
+        Ok(())
+    }
+
+    #[test]
+    fn test_hex_input() -> StdResult {
+        let mut data = [0u8; 32];
+        thread_rng().fill_bytes(&mut data);
+
+        let ref_art = BishopArt::new().chain(data).draw();
+        let hex = hex::encode(data.as_ref());
+
+        let mut art_inst = BishopArt::new();
+        art_from_read(hex.as_bytes(), &InputType::Hex, &mut art_inst)?;
+        let chk_art = art_inst.draw();
+
+        assert_eq!(ref_art, chk_art);
+        Ok(())
+    }
+
+    #[test]
+    fn test_bin_input() -> StdResult {
+        let mut data = [0u8; 32];
+        thread_rng().fill_bytes(&mut data);
+
+        let ref_art = BishopArt::new().chain(data).draw();
+
+        let mut art_inst = BishopArt::new();
+        art_from_read(data.as_ref(), &InputType::Bin, &mut art_inst)?;
+        let chk_art = art_inst.draw();
+
+        assert_eq!(ref_art, chk_art);
+        Ok(())
+    }
+
+}
+
