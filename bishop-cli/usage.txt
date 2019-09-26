@@ -1,0 +1,28 @@
+bishop-cli
+Visualizes keys and hashes using OpenSSH's Drunken Bishop algorithm
+
+USAGE:
+    bishop [FLAGS] [OPTIONS] [hex]
+
+FLAGS:
+    -q, --quiet      Don't echo hex input
+    -s, --stdin      Use stdin as input, shorthand for `-i -`
+        --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -i <file>                Input file
+    -I <type>                Input type for -i
+                              bin  - Treat as binary data (default)
+                              hex  - Treat as HEX data
+                              hash - Hash input file as binary and then visualize hash (sha256)
+                                     Use this for large inputs
+
+        --chars <chars>      Custom char list: '[bg][char]...[start][end]'
+    -w, --width <width>      Field width [default: 17]
+    -h, --height <height>    Field height [default: 9]
+    -t, --top <top>          Top frame text
+    -b, --bot <bot>          Bottom frame text
+
+ARGS:
+    <hex>    HEX input, should have even length
