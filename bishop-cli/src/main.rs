@@ -11,6 +11,7 @@ use std::io::{self, Read, BufReader};
 use std::fs::File;
 
 use input_data::*;
+use InputType::*;
 
 custom_error! { BishopCliError
     Hex{source: hex::FromHexError} = "Hex parse: {source}",
@@ -34,8 +35,6 @@ enum Input<'a> {
     File(&'a PathBuf),
     Hex(&'a String)
 }
-
-use InputType::*;
 
 fn _raise<R, S: Into<String>>(m: S) -> Result<R, BishopCliError> {
     Err(BishopCliError::Other { msg: m.into() })
@@ -92,11 +91,18 @@ struct Opts {
     bot: Option<String>,
 }
 
-fn art_from_read<R: Read>(mut r: R, t: &InputType, art: &mut BishopArt) -> io::Result<u64> {
+fn input_echo(h: &impl AsRef<str>) {
+    println!("Fingerprint of:\n{}\n", h.as_ref());
+}
+
+fn art_from_read<R: Read>(mut r: R, t: &InputType, art: &mut BishopArt, quiet: bool) -> io::Result<u64> {
     match t {
         Bin => io::copy(&mut r, art),
         Hash => {
             let a = hash_input(&mut r)?;
+            if !quiet {
+                input_echo(&hex::encode(a));
+            }
             io::copy(&mut a.as_ref(), art)
         }
         Hex => {
@@ -122,7 +128,8 @@ fn main_() -> Result<(), BishopCliError> {
     let mut art = BishopArt::with_size(o.width, o.height)?;
 
     let input_t_set = o.input_type.is_some();
-    let input_t = o.input_type.unwrap_or(Bin);
+    let input_t = o.input_type.as_ref().unwrap_or(&Bin);
+    let quiet = o.quiet;
     let dash = PathBuf::from("-");
 
     let input_f = match (o.input_stdin, &o.input, &o.hex) {
@@ -141,18 +148,17 @@ fn main_() -> Result<(), BishopCliError> {
     match input_f {
         Input::StdIn => {
             let bf = io::stdin();
-            art_from_read(bf.lock(), &input_t, &mut art)?;
+            art_from_read(bf.lock(), &input_t, &mut art, quiet)?;
         }
         Input::File(i) => {
             let f = File::open(i)?;
             let bf = BufReader::new(f);
-            art_from_read(bf, &input_t, &mut art)?;
+            art_from_read(bf, &input_t, &mut art, quiet)?;
         }
         Input::Hex(h) => {
-            if !o.quiet {
-                println!("Fingerprint of:\n{}\n", h);
+            if !quiet {
+                input_echo(&h);
             }
-
             let d = hex::decode(h)?;
             art.input(d);
         }
@@ -181,6 +187,8 @@ mod tests {
     use std::error::{Error as StdError};
     type StdResult = Result<(), Box<dyn StdError>>;
 
+    const QUIET: bool = true;
+
     #[test]
     fn test_hash_input() -> StdResult {
         let mut data = [0u8; 64];
@@ -190,7 +198,7 @@ mod tests {
         let ref_art = BishopArt::new().chain(ref_hash).draw();
 
         let mut art_inst = BishopArt::new();
-        art_from_read(data.as_ref(), &InputType::Hash, &mut art_inst)?;
+        art_from_read(data.as_ref(), &InputType::Hash, &mut art_inst, QUIET)?;
         let chk_art = art_inst.draw();
 
         assert_eq!(ref_art, chk_art);
@@ -206,7 +214,7 @@ mod tests {
         let hex = hex::encode(data.as_ref());
 
         let mut art_inst = BishopArt::new();
-        art_from_read(hex.as_bytes(), &InputType::Hex, &mut art_inst)?;
+        art_from_read(hex.as_bytes(), &InputType::Hex, &mut art_inst, QUIET)?;
         let chk_art = art_inst.draw();
 
         assert_eq!(ref_art, chk_art);
@@ -221,7 +229,7 @@ mod tests {
         let ref_art = BishopArt::new().chain(data).draw();
 
         let mut art_inst = BishopArt::new();
-        art_from_read(data.as_ref(), &InputType::Bin, &mut art_inst)?;
+        art_from_read(data.as_ref(), &InputType::Bin, &mut art_inst, QUIET)?;
         let chk_art = art_inst.draw();
 
         assert_eq!(ref_art, chk_art);
