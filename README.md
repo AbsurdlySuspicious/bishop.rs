@@ -31,6 +31,7 @@ Library and CLI app for visualizing data using The Drunken Bishop algorithm impl
 * [Install](#install)
 * [Examples](#examples)
 	* [Using as command-line app](#using-as-command-line-app)
+		* [Note on char list](#note-on-char-list)
 	* [Using as library](#using-as-library)
 		* [`Cargo.toml`](#cargotoml)
 		* [For `AsRef<u8>` (slices, vectors)](#for-asrefu8-slices-vectors)
