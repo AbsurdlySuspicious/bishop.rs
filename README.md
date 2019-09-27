@@ -115,6 +115,29 @@ This behavior can be disabled using `-q` option.
 You can read full usage for cli app (also available by `--help` option)
 [here](bishop-cli/usage.txt)
 
+#### Note on char list
+
+You can provide custom char list wich `-c` option.
+This is a vector of chars used for fingerprint (represened as string).
+
+Each char is treated as:
+
+Index  | Description             | Default          |
+-------|-------------------------|------------------|
+`0`    | Field background        | ` `              |
+`1..n` | Chars used for drawing  | `.o+=*BOX@%&#/^` |
+`n+1`  | Char for start position | `S`              |
+`n+2`  | Char for last position  | `E`              |
+
+Each non-background char indicates how many
+times bishop has been on this position.
+
+Start and end chars overwrites the real value.
+
+Char list must be at least 4 chars long,
+but secure char list is at least 18 chars long
+and only consists of clearly distinguishable symbols.
+
 ### Using as library
 
 #### `Cargo.toml`
