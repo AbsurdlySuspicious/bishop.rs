@@ -52,10 +52,10 @@ bishop-cli ([source](bishop-cli/)) | Command-line app | [![cargo](https://img.sh
 
 **CLI app:**
 
-Platform                | Package                                                                     |
-------------------------|-----------------------------------------------------------------------------|
-**Arch Linux**          | TBD AUR                                                                     |
-**Prebuilts for Linux** | [Github releases](https://github.com/AbsurdlySuspicious/bishop.rs/releases) |
+Platform                | Package                                                                                        |
+------------------------|------------------------------------------------------------------------------------------------|
+**Arch Linux**          | [![aur](https://img.shields.io/aur/version/bishop)](https://aur.archlinux.org/packages/bishop) |
+**Prebuilts for Linux** | [Github releases](https://github.com/AbsurdlySuspicious/bishop.rs/releases)                    |
 
 ## Examples
 
