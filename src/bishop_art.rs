@@ -1,5 +1,5 @@
 use crate::vec2d::*;
-use crate::{_raise, result::Result};
+use crate::errors::{Error, Result};
 
 use unicode_width::*;
 use std::io::{self, Write};
@@ -146,11 +146,10 @@ impl BishopArt {
             (GEOMETRY_LIMITS_MIN, GEOMETRY_LIMITS_MAX);
 
         if w > max_w || h > max_h || w < min_w || h < min_h {
-            let e = format!(
-                "Field geometry must be within range: [{},{}] - [{},{}]",
-                min_w, min_h, max_w, max_h
-            );
-            return _raise(e);
+            return Err(Error::BadGeometry {
+                min_wh: GEOMETRY_LIMITS_MIN,
+                max_wh: GEOMETRY_LIMITS_MAX
+            })
         }
 
         let pos = ((w - 1) / 2, (h - 1) / 2);
