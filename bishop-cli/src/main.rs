@@ -3,7 +3,7 @@ mod input_data;
 #[macro_use]
 extern crate custom_error;
 
-use bishop::{bishop_art::DEFAULT_CHARS, *};
+use bishop::{errors::Error as BishopError, bishop_art::DEFAULT_CHARS, *};
 use std::fs::File;
 use std::io::{self, BufReader, Read};
 use std::path::PathBuf;
