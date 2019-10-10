@@ -72,21 +72,21 @@ pub use bishop_art::{BishopArt, BishopResult, DrawingOptions};
 
 /// Module with local errors
 pub mod errors {
-    use std::{io, result};
-    use thiserror as te;
+  use std::{io, result};
+  use thiserror as te;
 
-    #[derive(te::Error, Debug)]
-    pub enum Error {
-        #[error("IO: {0}")]
-        IO(#[source] io::Error),
+  #[derive(te::Error, Debug)]
+  pub enum Error {
+    #[error("IO: {0}")]
+    IO(#[source] io::Error),
 
-        #[error("Field geometry must be within range: {min_wh:?} - {max_wh:?}")]
-        BadGeometry {
-            min_wh: (usize, usize),
-            max_wh: (usize, usize),
-        },
-    }
+    #[error("Field geometry must be within range: {min_wh:?} - {max_wh:?}")]
+    BadGeometry {
+      min_wh: (usize, usize),
+      max_wh: (usize, usize),
+    },
+  }
 
-    /// Local result type
-    pub type Result<T> = result::Result<T, Error>;
+  /// Local result type
+  pub type Result<T> = result::Result<T, Error>;
 }
