@@ -1,6 +1,6 @@
 [package]
 name = "bishop"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["AbsurdlySuspicious <repom2@airmail.cc>"]
 edition = "2018"
 
@@ -18,7 +18,7 @@ members = [
 
 [dependencies]
 unicode-width = "0.1.6"
-thiserror = "1.0"
+thiserror = "1.0.0"
 
 [dev-dependencies]
 hex = "0.3.2"
