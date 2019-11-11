@@ -1,44 +1,52 @@
 use std::ops::{Index, IndexMut};
 
-pub type InnerVec<T> = Vec<Vec<T>>;
-
 #[derive(PartialEq, Debug)]
-pub struct Vec2D<T>(pub InnerVec<T>);
+pub struct Vec2D<T> {
+  pub vec: Vec<T>,
+  pub w: usize,
+  pub h: usize,
+}
 
 impl<T: Clone> Vec2D<T> {
   pub fn new(w: usize, h: usize, init: T) -> Vec2D<T> {
-    Vec2D(vec![vec![init; w]; h])
+    Vec2D { vec: vec![init; w * h], w, h }
+  }
+
+  #[inline(always)]
+  fn idx(&self, x: usize, y: usize) -> usize {
+    (self.w * y) + x
   }
 
   pub fn get(&self, x: usize, y: usize) -> &T {
-    &self.0[y][x]
+    &self.vec[self.idx(x, y)]
   }
 
   pub fn get_mut(&mut self, x: usize, y: usize) -> &mut T {
-    &mut self.0[y][x]
+    let i = self.idx(x, y);
+    &mut self.vec[i]
   }
 
   pub fn iget(&self, x: isize, y: isize) -> &T {
     assert!(x >= 0 && y >= 0);
-    &self.0[y as usize][x as usize]
+    self.get(x as usize, y as usize)
   }
 
   pub fn iget_mut(&mut self, x: isize, y: isize) -> &mut T {
     assert!(x >= 0 && y >= 0);
-    &mut self.0[y as usize][x as usize]
+    self.get_mut(x as usize, y as usize)
   }
 
-  pub fn get_row(&self, y: usize) -> &Vec<T> {
-    &self.0[y]
-  }
+  // pub fn get_row(&self, y: usize) -> &Vec<T> {
+  //   &self.0[y]
+  // }
 
-  pub fn into_vec(self) -> InnerVec<T> {
-    self.0
-  }
+  // pub fn into_vec(self) -> InnerVec<T> {
+  //   self.0
+  // }
 
-  pub fn vec(&self) -> &InnerVec<T> {
-    &self.0
-  }
+  // pub fn vec(&self) -> &InnerVec<T> {
+  //   &self.0
+  // }
 }
 
 impl<T: Clone + Default> Vec2D<T> {

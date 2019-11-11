@@ -371,10 +371,9 @@ impl BishopResult {
     };
 
     let line = |s: &mut String, y: usize| {
-      let row = self.field.get_row(y);
       s.push('|');
       for x in 0..w {
-        let c = match row[x] {
+        let c = match *self.field.get(x, y) {
           VALUE_E => chr_e,
           VALUE_S => chr_s,
           v if v < 0 => unreachable!(),
@@ -513,13 +512,14 @@ mod tests {
         .filter(|l| !l.starts_with('+'))
         .map(|l| l.trim_matches('|'))
         .map(|l| l.chars().map(|c| chars[&c]).collect::<Vec<_>>())
+        .flatten()
         .collect();
 
       let data = hex::decode(hash).unwrap();
       let r = BishopArt::new().chain(data).result();
 
-      println!("ref: {}, r: {}", ref_f.len(), r.field.vec().len());
-      assert_eq!(Vec2D(ref_f), r.field);
+      println!("ref: {}, r: {}", ref_f.len(), r.field.vec.len());
+      assert_eq!(ref_f, r.field.vec);
     }
   }
 }
