@@ -1,6 +1,6 @@
 [package]
 name = "bishop-cli"
-version = "0.2.5"
+version = "0.2.6"
 authors = ["AbsurdlySuspicious <repom2@airmail.cc>"]
 edition = "2018"
 
