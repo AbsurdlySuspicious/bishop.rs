@@ -21,7 +21,7 @@ custom_error! { BishopCliError
 }
 
 arg_enum! {
-    #[derive(Debug)]
+    #[derive(Debug, Clone, Copy)]
     enum InputType {
         Bin,
         Hex,
@@ -66,6 +66,14 @@ struct Opts {
  "
   )]
   input_type: Option<InputType>,
+
+  /// Hash input data (shorthand for -I hash)
+  #[structopt(short = "H")]
+  hash_input: bool,
+
+  /// Trear input data as HEX (shorthand for -I hex)
+  #[structopt(short = "X")]
+  hex_input: bool,
 
   /// HEX input, should have even length
   #[structopt(name = "hex")]
@@ -141,10 +149,26 @@ fn main_() -> Result<(), BishopCliError> {
 
   let mut art = BishopArt::with_size(o.width, o.height)?;
 
-  let input_t_set = o.input_type.is_some();
-  let input_t = o.input_type.as_ref().unwrap_or(&Bin);
+  let mut input_t_set = o.input_type.is_some();
+  let mut input_t = *(o.input_type.as_ref().unwrap_or(&Bin));
   let quiet = o.quiet;
   let dash = PathBuf::from("-");
+
+  let input_t_shorthand = match (o.hash_input, o.hex_input) {
+      (true, false) => Some(InputType::Hash),
+      (false, true) => Some(InputType::Hex),
+      (true, true) => _raise("Input type conflict")?,
+      _ => None,
+  };
+  if let Some(sh_input_type) = input_t_shorthand {
+      if input_t_set {
+          _raise("Input type conflict")?;
+          unreachable!();
+      }
+      input_t_set = true;
+      input_t = sh_input_type;
+  }
+
 
   let input_f = match (o.input_stdin, &o.input, &o.hex) {
     (true, None, None) => Input::StdIn,
