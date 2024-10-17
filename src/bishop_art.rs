@@ -348,7 +348,7 @@ impl BishopResult {
 
           for (i, c) in text.char_indices() {
             let sz = size + c.width().unwrap_or(0);
-            if sz < real_w {
+            if sz <= real_w {
               last = i + c.len_utf8();
               size = sz;
             } else {
