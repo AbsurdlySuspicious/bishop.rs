@@ -1,30 +1,25 @@
-bishop-cli 0.2.6
 Visualizes keys and hashes using OpenSSH's Drunken Bishop algorithm
 
-USAGE:
-    bishop [FLAGS] [OPTIONS] [hex]
+Usage: bishop [OPTIONS] [hex]
 
-FLAGS:
-    -q, --quiet      Don't echo hex input
-    -s, --stdin      Use stdin as input, shorthand for `-i -`
-    -H               Hash input data (shorthand for -I hash)
-        --help       Prints help information
-    -X               Trear input data as HEX (shorthand for -I hex)
-    -V, --version    Prints version information
+Arguments:
+  [hex]  HEX input, should have even length
 
-OPTIONS:
-    -i <file>                Input file
-    -I <type>                Input type for -i
-                              bin  - Treat as binary data (default)
-                              hex  - Treat as HEX data
-                              hash - Hash input file as binary and then visualize hash (sha256)
-                                     Use this for large inputs
-                              
-        --chars <chars>      Custom char list: '[bg][char]...[start][end]'
-    -w, --width <width>      Field width [default: 17]
-    -h, --height <height>    Field height [default: 9]
-    -t, --top <top>          Top frame text
-    -b, --bot <bot>          Bottom frame text
-
-ARGS:
-    <hex>    HEX input, should have even length
+Options:
+  -q, --quiet            Don't echo hex input
+  -i <file>              Input file
+  -s, --stdin            Use stdin as input, shorthand for `-i -`
+      --chars <CHARS>    Custom char list: '[bg][char]...[start][end]'
+  -I <type>              Input type for -i
+                          bin  - Treat as binary data (default)
+                          hex  - Treat as HEX data
+                          hash - Hash input file as binary and then visualize hash (sha256)
+                                 Use this for large inputs
+                           [possible values: bin, hex, hash]
+  -H                     Hash input data (shorthand for -I hash)
+  -X                     Treat input data as HEX (shorthand for -I hex)
+  -w, --width <WIDTH>    Field width [default: 17]
+  -h, --height <HEIGHT>  Field height [default: 9]
+  -t, --top <TOP>        Top frame text
+  -b, --bot <BOT>        Bottom frame text
+  -h, --help             Print help

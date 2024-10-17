@@ -12,8 +12,8 @@ categories = ["command-line-utilities"]
 readme = "README.md"
 
 [dependencies]
-bishop = { version = "0.3.4", path = "../"}
-structopt = "0.3.0"
+bishop = { version = "0.3.4", path = "../" }
+clap = { version = "4.5.20", features = ["derive"] }
 custom_error = "1.7.1"
 hex = "0.3.2"
 sha2 = "0.8.0"

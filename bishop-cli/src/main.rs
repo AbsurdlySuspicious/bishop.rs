@@ -7,8 +7,8 @@ use bishop::{errors::Error as BishopError, bishop_art::DEFAULT_CHARS, *};
 use std::fs::File;
 use std::io::{self, BufReader, Read};
 use std::path::PathBuf;
-use structopt::clap::arg_enum;
-use structopt::StructOpt;
+use clap;
+use clap::Parser as _;
 
 use input_data::*;
 use InputType::*;
@@ -20,13 +20,11 @@ custom_error! { BishopCliError
     Other{msg: String} = "{msg}"
 }
 
-arg_enum! {
-    #[derive(Debug, Clone, Copy)]
-    enum InputType {
-        Bin,
-        Hex,
-        Hash
-    }
+#[derive(clap::ValueEnum, Debug, Clone, Copy)]
+enum InputType {
+    Bin,
+    Hex,
+    Hash
 }
 
 #[derive(Debug)]
@@ -41,22 +39,23 @@ fn _raise<R, S: Into<String>>(m: S) -> Result<R, BishopCliError> {
 }
 
 /// Visualizes keys and hashes using OpenSSH's Drunken Bishop algorithm
-#[derive(StructOpt, Debug)]
-#[structopt(name = "bishop-cli")]
+#[derive(clap::Parser, Debug)]
+#[command(name = "bishop-cli")]
 struct Opts {
   /// Input file
-  #[structopt(short, name = "file", parse(from_os_str), display_order = 100)]
+  #[arg(short, name = "file", display_order = 100)]
   input: Option<PathBuf>,
 
   /// Use stdin as input, shorthand for `-i -`
-  #[structopt(short = "s", long = "stdin", display_order = 101)]
+  #[arg(short = 's', long = "stdin", display_order = 101)]
   input_stdin: bool,
 
-  #[structopt(
-    short = "I",
+  #[arg(
+    short = 'I',
     name = "type",
-    case_insensitive = true,
-    display_order = 102,
+    ignore_case = true,
+    value_enum,
+    display_order = 200,
     help = "\
     Input type for -i
  bin  - Treat as binary data (default)
@@ -68,39 +67,39 @@ struct Opts {
   input_type: Option<InputType>,
 
   /// Hash input data (shorthand for -I hash)
-  #[structopt(short = "H")]
+  #[arg(short = 'H', display_order = 201)]
   hash_input: bool,
 
-  /// Trear input data as HEX (shorthand for -I hex)
-  #[structopt(short = "X")]
+  /// Treat input data as HEX (shorthand for -I hex)
+  #[arg(short = 'X', display_order = 202)]
   hex_input: bool,
 
   /// HEX input, should have even length
-  #[structopt(name = "hex")]
+  #[arg(name = "hex")]
   hex: Option<String>,
 
   /// Don't echo hex input
-  #[structopt(short, long, display_order = 0)]
+  #[arg(short, long, display_order = 0)]
   quiet: bool,
 
   /// Custom char list: '[bg][char]...[start][end]'
-  #[structopt(long, display_order = 200)]
+  #[arg(long, display_order = 200)]
   chars: Option<String>,
 
   /// Field width
-  #[structopt(short, long, default_value = "17", display_order = 301)]
+  #[arg(short, long, default_value = "17", display_order = 301)]
   width: usize,
 
   /// Field height
-  #[structopt(short, long, default_value = "9", display_order = 302)]
+  #[arg(short, long, default_value = "9", display_order = 302)]
   height: usize,
 
   /// Top frame text
-  #[structopt(short, long, display_order = 401)]
+  #[arg(short, long, display_order = 401)]
   top: Option<String>,
 
   /// Bottom frame text
-  #[structopt(short, long, display_order = 402)]
+  #[arg(short, long, display_order = 402)]
   bot: Option<String>,
 }
 
@@ -139,7 +138,7 @@ fn str_opt<'a>(s: &'a Option<String>, d: &'static str) -> &'a str {
 }
 
 fn main_() -> Result<(), BishopCliError> {
-  let o = Opts::from_args();
+  let o = Opts::parse();
 
   let draw_opts = DrawingOptions {
     chars: str_opt(&o.chars, DEFAULT_CHARS).chars().collect(),
